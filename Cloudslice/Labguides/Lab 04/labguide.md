@@ -1,4 +1,4 @@
-# Lab 04- Row Model
+# Lab 04: Configure a dynamic P&L row model in Fabric Planning
 
 ## Scenario
 
