@@ -1,821 +1,1291 @@
-# Plan, Calculate, and Optimize: Top-Down and Bottom-Up Sales Planning with Plan in Microsoft Fabric
+# Lab 01: Build and optimize a sales plan on a Power BI semantic model with Plan in Microsoft Fabric
 
-## Introduction
+**Scenario**
 
-In this lab, you build a complete planning environment in Microsoft Fabric from scratch. You import the Acme Beverages semantic model, create a Fabric SQL database, set up a Plan (preview) app, and configure semantic model and SQL database connections. You then create a planning sheet, explore the Plan interface, set a top-down 2026 Sales Target, build a bottom-up 2026 Sales Plan, and use the Optimizer to find the mix of revenue growth and cost reduction that meets a gross profit target. An optional final part shows how to configure a two-level approval workflow.
+Acme Beverages is a global beverage company that sells beer, hard
+seltzer, and other drinks across North America, APAC, the EU, and Latin
+America. Leadership has asked Finance and Sales to prepare the 2026
+plan. Finance will set a top-down revenue target, weighting growth
+toward the second half of the year. Sales will build a bottom-up plan
+from 2025 actuals, including an agreed uplift for Summit Lager in North
+America and a summer promotion for Beer and Hard Seltzer in the EU and
+Latin America. The CFO has also set a \$12.5B gross profit goal, so the
+team must work out how much revenue growth and cost reduction are needed
+to reach it. Finally, plan changes must be routed through Regional
+Manager and Finance Director approval before the plan is finalized.
 
-Modern financial planning depends on bringing finance and sales together around one governed source of data. Planning directly on top of a Power BI semantic model, with changes stored in a Fabric SQL database, removes disconnected spreadsheets and manual reconciliation. Teams can collaborate with comments, status tracking, and approvals. Built-in tools such as proportional distribution, cell locking, Bulk Edit, and the Optimizer help planners model scenarios quickly and arrive at targets they can defend.
+To bring Finance and Sales together around one governed source of data,
+Acme Beverages plans directly on top of its Power BI semantic model in
+Microsoft Fabric. The solution uses the following key components:
 
-## Scenario
+- **Acme Beverages semantic model**: Provides the governed 2025 actuals,
+  dimensions, and measures that the plan is built on.
 
-You are a financial planning analyst at Acme Beverages, a global beverage company that sells beer, hard seltzer, and other drinks across North America, APAC, EU, and Latin America. Leadership has asked Finance and Sales to prepare the 2026 plan. Finance will set a top-down revenue target, weighting growth toward the second half of the year. Sales will build a bottom-up plan from 2025 actuals, including an agreed uplift for Summit Lager in North America and a summer promotion for Beer and Hard Seltzer in the EU and Latin America. The CFO has also set a $12.5B gross profit goal, so you must work out how much revenue growth and cost reduction are needed to reach it. Finally, you will route plan changes through Regional Manager and Finance Director approval before the plan is finalized.
+- **Fabric SQL database**: Stores plan changes and enables collaboration
+  for workspace viewers.
 
-## Objectives
+- **Plan (preview) app**: Hosts the planning sheets where you set
+  targets, distribute values, lock cells, and apply Bulk Edit uplifts.
 
-By the end of this lab, you will be able to:
+- **Optimizer**: Finds the mix of revenue growth and cost reduction that
+  meets the gross profit target.
 
-- Set up a planning environment by importing the Acme Beverages semantic model, creating a Fabric SQL database, and building a Plan app with semantic model and SQL database connections
-- Navigate the Plan interface, including the ribbons, header, Explorer pane, sidebar panels, and footer
-- Create a top-down 2026 Target distributed by prior-year weights and apply an H2 skew by locking quarters
-- Build a bottom-up 2026 Sales Plan using cell-level adjustments, trend distribution, and Bulk Edit uplifts
-- Add inline comments, a Comments column, and a Status column to support row-level collaboration
-- Calculate gross profit with a formula column and run the Optimizer to achieve a $12.5B gross profit target
+- **Approval workflow**: Routes plan changes through Regional Manager
+  and Finance Director review with Microsoft Teams notifications.
 
-## Prerequisites
+In this lab, you are a financial planning analyst at Acme Beverages. You
+build the planning environment, set the top-down 2026 Sales Target,
+build the bottom-up 2026 Sales Plan, use the Optimizer to reach the
+CFO's gross profit goal, and optionally configure the approval workflow.
 
-- Access to a Microsoft Fabric workspace that meets the requirements in the prerequisites document, with permission to create SQL databases and Plan (preview) items
-- The Acme_Beverages.pbix file downloaded from the lab Resources
-- Basic familiarity with Power BI semantic models, dimensions, and measures
-- Access to Microsoft Teams and a second user account (optional, for the approval workflow and @mention steps)
+**Introduction**
 
-**Estimated duration:** 60 minutes
+In this lab, you build a complete planning environment in Microsoft
+Fabric from scratch. You import the Acme Beverages semantic model,
+create a Fabric SQL database, set up a Plan (preview) app, and configure
+semantic model and SQL database connections. You then create a planning
+sheet, explore the Plan interface, set a top-down 2026 Sales Target,
+build a bottom-up 2026 Sales Plan, and use the Optimizer to find the mix
+of revenue growth and cost reduction that meets a gross profit target.
+An optional final exercise shows how to configure a two-level approval
+workflow. Planning on a Power BI semantic model, with changes stored in
+a Fabric SQL database, removes disconnected spreadsheets and manual
+reconciliation. Built-in tools such as distribution, cell locking, Bulk
+Edit, comments, approvals, and the Optimizer help you model scenarios
+quickly and set targets you can defend.
 
----
+**Objectives**
 
-## Exercise 1: Plan, Calculate, Optimize
+After completing this lab, you will be able to:
 
-In this exercise, you build a complete planning environment for Acme Beverages, set a top-down 2026 Sales Target, build a bottom-up 2026 Sales Plan, run the Optimizer to reach a gross profit target, and optionally configure an approval workflow.
+- Set up a planning environment by importing the Acme Beverages semantic
+  model, creating a Fabric SQL database, and building a Plan app with
+  semantic model and SQL database connections
 
-> **Note:** When you name the .pbix file and the Fabric SQL database, add your name as a suffix, for example **Acme_Beverages_JohnS** or **Acme_Beverages_JS**. A unique identifier is added automatically to connection names. This keeps your items separate in shared workspaces, prevents naming conflicts and makes your items easier to find and troubleshoot.
+- Navigate the Plan interface, including the ribbons, header, Explorer
+  pane, sidebar panels, and footer
 
-### Task 1: Create your training workspace
+- Create a top-down 2026 Target distributed by prior-year weights and
+  apply an H2 skew by locking quarters
 
-In this task, you sign in to Microsoft Fabric and create a workspace on a Fabric capacity. This workspace holds the semantic model, SQL database and Plan app that you use in the rest of the lab.
+- Build a bottom-up 2026 Sales Plan using cell-level adjustments, trend
+  distribution, and Bulk Edit uplifts
 
-1. Open a browser and navigate to the following URL:
+- Add inline comments, a Comments column, and a Status column to support
+  row-level collaboration
 
-   ```text
-   https://app.fabric.microsoft.com/
-   ```
+- Calculate gross profit with a formula column and run the Optimizer to
+  achieve a \$12.5B gross profit target
 
-2. Sign in with your credentials.
+**Architecture**
 
-   The Fabric **Home** page opens and shows **Welcome to Fabric**.
+You import the Acme Beverages .pbix file, which creates a Power BI
+semantic model and report in a Fabric workspace. The Plan (preview) app
+connects to the semantic model for governed 2025 actuals and stores plan
+changes in a Fabric SQL database. Analysts build top-down and bottom-up
+planning sheets, run the Optimizer to reach the gross profit goal, and
+route changes through an approval workflow with Microsoft Teams
+notifications.
 
-   ![Screenshot 1](./media/image1.png)
+![Screenshot](media/image1.png)
 
-3. On the **Home** page, under **Welcome to Fabric**, select **New workspace**.
+**Prerequisites**
 
-   The **Create a workspace** pane opens.
+- Access to a Microsoft Fabric workspace that meets the requirements in
+  the prerequisites document, with permission to create SQL databases
+  and Plan (preview) items
 
-   ![Screenshot 2](./media/image2.png)
+- The **ACME Beverages.pbix** file downloaded from the lab **Resources**
 
-4. In the **Name** field, enter the following:
+- Basic familiarity with Power BI semantic models, dimensions, and
+  measures
 
-   ```text
-   Fabricplan-Day176895
-   ```
+- Access to Microsoft Teams and a second user account (optional, for the
+  approval workflow and @mention steps)
 
-   The message **This name is available** appears under the field.
+# Exercise 1: Set up the planning environment
 
-5. Select **Advanced** to expand the advanced settings.
+In this exercise, you build the Acme Beverages planning environment with
+a workspace, semantic model, SQL database, Plan app, and connections.
 
-   The **Contact list** field shows your user as **(Owner)**.
+**Note:** When you name the Fabric SQL database, add your name as a
+suffix, for example Acme_Beverages_JohnS or Acme_Beverages_JS. Fabric
+adds a unique identifier to connection names automatically. The suffix
+keeps your items separate in shared workspaces, prevents naming
+conflicts, and makes your items easier to find and troubleshoot.
 
-   ![Screenshot 3](./media/image3.png)
+## Task 1: Create your training workspace
 
-6. Scroll down and under the workspace type options, select **Fabric**.
+In this task, you sign in to Microsoft Fabric and create a workspace on
+a Fabric capacity. This workspace holds the semantic model, SQL
+database, and Plan app that you use in the rest of the lab.
 
-7. In the **Details** list, select **fabriccapacity64970352 - West US 2**.
+1.  In a browser, go to the following URL:
 
-8. Under **Semantic model storage format**, confirm that **Small semantic model storage format** is selected.
+    +++https://app.fabric.microsoft.com/+++
 
-9. Select **Apply**.
+2.  In the **Email** field, enter
+    +++@lab.CloudPortalCredential(User1).Username+++, and then select
+    **Next**.
 
-   The workspace is created and opens.
+    The sign-in page asks for your password.
 
-   ![Screenshot 4](./media/image4.png)
+3.  In the **Password** field, enter
+    +++@lab.CloudPortalCredential(User1).Password+++, and then select
+    **Sign in**.
 
-### Task 2: Create a folder for the lab
+    The Fabric **Home** page opens and shows **Welcome to Fabric**.
 
-In this task, you create a folder in the workspace to hold the items for this lab. The folder keeps your Plan items together and separate from other content in the workspace.
+4.  On the **Home** page, under **Welcome to Fabric**, select **New
+    workspace**.
 
-1. In the left navigation pane, select the **Fabricplan-Day176895** workspace.
+    The **Create a workspace** pane opens.
 
-   The workspace opens and shows **Choose from predesigned task flows or add a task to build one**.
+    ![Screenshot](media/image2.png)
 
-   ![Screenshot 5](./media/image5.png)
+5.  In the **Name** field, enter the following workspace name:
 
-2. On the workspace toolbar, select **New folder**.
+    +++Fabricplan-Day1@lab.LabInstance.Id+++
 
-   ![Screenshot 6](./media/image6.png)
+    The message **This name is available** appears under the field.
 
-   The **New folder** dialog opens.
+    **Note:** The screenshots show the workspace name
+    **Fabricplan-Day176895**. Your workspace name ends with your own lab
+    instance ID.
 
-3. In the **New folder** dialog, enter the following folder name:
+6.  Select **Advanced** to expand the advanced settings.
 
-   ```text
-   Day1-Plan
-   ```
+    The **Contact list** field shows your user as **(Owner)**, for example
+    **User1-64970352 (Owner)**.
 
-   ![Screenshot 7](./media/image7.png)
+    ![Screenshot](media/image3.png)
 
-4. Select **Create**.
+7.  Under the workspace type options, select **Fabric**.
 
-   The **Day1-Plan** folder appears in the workspace item list with the **Type** set to **Folder**.
+8.  In the **Details** list, select your Fabric capacity, for example
+    **fabriccapacity64970352 - West US 2**.
 
-   ![Screenshot 8](./media/image8.png)
+9.  Under **Semantic model storage format**, confirm that **Small
+    semantic model storage format** is selected.
 
-### Task 3: Import the PBIX file
+10. Select **Apply**.
 
-In this task, you import the **ACME Beverages** Power BI file into the **Day1-Plan** folder. The file contains the semantic model and report that the planning exercises use.
+    Fabric creates the workspace and opens it.
 
-1. In the **Fabricplan-Day176895** workspace, select the **Day1-Plan** folder.
+    ![Screenshot](media/image4.png)
 
-   The folder opens and the breadcrumb shows **Fabricplan-Day176895** > **Day1-Plan**.
+## Task 2: Create a folder for the lab
 
-2. On the workspace toolbar, select **Import** > **Report, Paginated Report or Workbook** > **From this computer**.
+In this task, you create a folder in the workspace to hold the items for
+this lab. The folder keeps your Plan items together and separate from
+other content in the workspace.
 
-   ![Screenshot 9](./media/image9.png)
+1.  In the left navigation pane, select the
+    **Fabricplan-Day1@lab.LabInstance.Id** workspace.
 
-   The **Open** dialog opens.
+    The workspace opens and shows **Choose from predesigned task flows or
+    add a task to build one**.
 
-3. In the **Open** dialog, browse to the folder where you saved the file you downloaded from **Resources**, for example **Local Disk (C:)** > **Labfiles**.
+    ![Screenshot](media/image5.png)
 
-4. Select the **ACME Beverages** file.
+2.  On the workspace toolbar, select **New folder**.
 
-   ![Screenshot 10](./media/image10.png)
+    ![Screenshot](media/image6.png)
 
-   > **Note:** If you saved the file to another location, such as a OneDrive folder, browse to that folder and select the **ACME Beverages** file there.
+    The **New folder** dialog opens.
 
-   ![Screenshot 12](./media/image12.png)
+3.  In the **New folder** dialog, enter the following folder name:
 
-5. Select **Open**.
+    +++Day1-Plan+++
 
-   The upload starts and the **Uploading ACME Beverages.pbix** notification appears in the upper-right corner of the workspace.
+    ![Screenshot](media/image7.png)
 
-   ![Screenshot 11](./media/image11.png)
+4.  Select **Create**.
 
-   > **Note:** The file is large, so the upload can take a few minutes. Don't select **Cancel upload** while it is in progress.
+    The **Day1-Plan** folder appears in the workspace item list, with
+    **Type** set to **Folder**.
 
-6. Verify that the **ACME Beverages** report and the **ACME Beverages** semantic model appear in the **Day1-Plan** folder.
+    ![Screenshot](media/image8.png)
 
-   The **Type** column shows **Report** for one item and **Semantic model** for the other.
+## Task 3: Import the PBIX file
 
-   ![Screenshot 13](./media/image13.png)
+In this task, you import the **ACME Beverages** Power BI file into the
+**Day1-Plan** folder. The file contains the semantic model and report
+that the planning exercises use.
 
-   > **Note:** A warning such as **Refresh failed due to missing data source credentials**, or a message that the data source connection cannot be validated, can appear. You can ignore it. The imported .pbix file already contains the data, so you can still map rows, columns, and values to your planning sheet.
+1.  In the **Fabricplan-Day1@lab.LabInstance.Id** workspace, select the
+    **Day1-Plan** folder.
 
-### Task 4: Create a SQL database
+    The folder opens, and the breadcrumb shows
+    **Fabricplan-Day1@lab.LabInstance.Id** \> **Day1-Plan**.
 
-In this task, you create a SQL database in the workspace. The database stores the planning data that you work with in the later exercises.
+2.  On the workspace toolbar, select **Import** \> **Report, Paginated
+    Report or Workbook** \> **From this computer**.
 
-1. In the **Fabricplan-Day176895** workspace, select **+ New item**.
+    ![Screenshot](media/image9.png)
 
-   The **New item** panel opens.
+    The **Open** dialog opens.
 
-2. In the search box of the **New item** panel, enter the following:
+3.  In the **Open** dialog, go to the folder where you saved the file
+    from **Resources**, for example **Local Disk (C:)** \> **Labfiles**.
 
-   ```text
-   sql
-   ```
+4.  Select the **ACME Beverages** file.
 
-3. Select **SQL database**.
+    ![Screenshot](media/image10.png)
 
-   ![Screenshot 14](./media/image14.png)
+    **Note:** If you saved the file to another location, such as a
+    OneDrive folder, go to that folder and select the **ACME Beverages**
+    file there.
 
-   The **New SQL database** dialog opens.
+    ![Screenshot](media/image11.png)
 
-4. In the **Name** field, enter the following and add your name as a suffix, for example **Acme_Beverages6857**:
+5.  Select **Open**.
 
-   ```text
-   Acme_Beverages
-   ```
+    The upload starts, and the **Uploading ACME Beverages.pbix**
+    notification appears in the upper-right corner of the workspace.
 
-   > **Note:** The suffix keeps the database name unique. Use this name wherever the lab refers to your SQL database.
+    ![Screenshot](media/image12.png)
 
-5. Select **Create**.
+    **Note:** The upload can take a few minutes. Don't select **Cancel
+    upload** while the file uploads.
 
-   ![Screenshot 15](./media/image15.png)
+6.  Verify that the **ACME Beverages** report and the **ACME Beverages**
+    semantic model appear in the **Day1-Plan** folder.
 
-   The database is created and opens. The **Explorer** pane shows your database, and the **Build your database** page appears.
+    ![Screenshot](media/image13.png)
 
-   ![Screenshot 16](./media/image16.png)
+    The **Type** column shows **Report** for one item and **Semantic
+    model** for the other.
 
-6. In the left navigation pane, select the **Fabricplan-Day176895** workspace icon.
+    **Note:** A warning such as **Refresh failed due to missing data
+    source credentials** can appear. A message that the data source
+    connection can't be validated can also appear. You can ignore these
+    messages. The imported .pbix file already contains the data, so you
+    can still map rows, columns, and values to your planning sheet.
 
-   The workspace pane opens. Under **Fabricplan-Day176895** > **Day1-Plan**, the **Acme_Beverages6857** SQL database appears, with its **Acme_Beverages6857** SQL analytics endpoint nested under it.
+## Task 4: Create a SQL database
 
-   ![Screenshot 17](./media/image17.png)
+In this task, you create a SQL database in the workspace. The database
+stores the planning data that you work with in the later exercises.
 
-7. In the workspace pane, select **Fabricplan-Day176895**.
+1.  In the **Day1-Plan** folder toolbar, select **+ New item**.
 
-   ![Screenshot 18](./media/image18.png)
+    The **New item** pane opens.
 
-   The **Fabricplan-Day176895** workspace opens.
+2.  In the **New item** pane search box, enter the following search
+    term:
 
-8. In the workspace item list, select the **Day1-Plan** folder.
+    +++sql+++
 
-   The breadcrumb shows **Fabricplan-Day176895** > **Day1-Plan**. The folder lists the **ACME Beverages** report, the **ACME Beverages** semantic model, the **Acme_Beverages6857** SQL database, and the **Acme_Beverages6857** SQL analytics endpoint.
+3.  Select **SQL database**.
 
-   ![Screenshot 19](./media/image19.png)
+    ![Screenshot](media/image14.png)
 
-### Task 5: Create a new Plan app
+    The **New SQL database** dialog opens.
 
-In this task, you create a Plan app in the **Day1-Plan** folder. The Plan app is where you build the planning, PowerTable and intelligence sheets for the Acme Beverages 2026 plan.
+4.  In the **Name** field, enter the following name, and then add your
+    name as a suffix, for example Acme_Beverages_JohnS:
 
-1. In the **Day1-Plan** folder, select **+ New item**.
+    +++Acme_Beverages+++
 
-   The **New item** pane opens.
+    **Note:** The suffix keeps the database name unique. Use this name
+    wherever the lab refers to your SQL database.
 
-2. In the **New item** pane, in the search box, enter the following:
+5.  Select **Create**.
 
-   ```text
-   plan
-   ```
+    ![Screenshot](media/image15.png)
 
-3. Select the **Plan** tile.
+    The database is created and opens. The **Explorer** pane shows your
+    database, and the **Build your database** page appears.
 
-   ![Screenshot 20](./media/image20.png)
+    ![Screenshot](media/image16.png)
 
-   The **New Plan** dialog opens.
+6.  In the left navigation pane, select the
+    **Fabricplan-Day1@lab.LabInstance.Id** workspace icon.
 
-4. In the **Name** field, enter the following:
+    The workspace pane opens. Under **Fabricplan-Day1@lab.LabInstance.Id**
+    \> **Day1-Plan**, your SQL database appears, for example
+    **Acme_Beverages_JohnS**. Its SQL analytics endpoint, which has the
+    same name as your database, is nested under it.
 
-   ```text
-   Acme_Beverages_Plan
-   ```
+    ![Screenshot](media/image17.png)
 
-   ![Screenshot 21](./media/image21.png)
+    **Note:** Fabric creates the SQL analytics endpoint automatically with
+    the SQL database. Your database name includes your own suffix, so it
+    can differ from **Acme_Beverages6857**.
 
-5. Confirm that **Location** shows **Fabricplan-Day176895** > **Day1-Plan**.
+7.  In the workspace pane, select
+    **Fabricplan-Day1@lab.LabInstance.Id**.
 
-6. Select **Create**.
+    ![Screenshot](media/image18.png)
 
-   The **Acme_Beverages_Plan** app opens to the **How Would You Like To Get Started?** screen. The **Get data** section lists **Semantic Model** and **Excel / CSV**. The **Create new sheet** section lists **Planning**, **PowerTable** and **Intelligence**.
+    The **Fabricplan-Day1@lab.LabInstance.Id** workspace opens.
 
-   ![Screenshot 22](./media/image22.png)
+8.  In the workspace item list, select the **Day1-Plan** folder.
 
-### Task 6: Connect to the semantic model
+    The breadcrumb shows **Fabricplan-Day1@lab.LabInstance.Id** \>
+    **Day1-Plan**. The folder contains the following items:
 
-In this task, you create a shared cloud connection and use it to connect the Plan app to a semantic model. Planning and BI sheets need this connection to read and use semantic model data.
+    - **ACME Beverages** report
 
-1. On the **How Would You Like To Get Started?** screen, under **Get data**, select **Semantic Model**.
+    - **ACME Beverages** semantic model
 
-   ![Screenshot 23](./media/image23.png)
+    - Your SQL database, for example **Acme_Beverages_JohnS**
 
-   The **Select Semantic Model Connection** dialog opens.
+    - **Acme_Beverages6857** SQL analytics endpoint
 
-2. In the **Select Semantic Model Connection** dialog, next to **Select a Connection**, select **+ Create Connection**.
+    ![Screenshot](media/image19.png)
 
-   ![Screenshot 24](./media/image24.png)
+## Task 5: Create a new Plan app
 
-   The **Create New Connection** dialog opens.
+In this task, you create a Plan app in the **Day1-Plan** folder. The
+Plan app is where you build the Planning, PowerTable, and Intelligence
+sheets for the Acme Beverages 2026 plan.
 
-3. Under **Connection credentials**, confirm that **Connection** shows **Create new connection**.
+1.  In the **Day1-Plan** folder toolbar, select **+ New item**.
 
-4. In the **Connection name** field, enter the following:
+    The **New item** pane opens with **All items** selected.
 
-   ```text
-   Acme_Beverages
-   ```
+2.  In the **New item** pane search box, enter +++plan+++.
 
-5. Confirm that **Authentication kind** shows **Organizational account**.
+    The **Plan** tile appears with the description **Unify Planning + BI +
+    Data Apps on top of your Semantic Models and Ontologies with
+    writeback**.
 
-6. Under **You are not signed in. Please sign in.**, select **Sign in**.
+3.  Select the **Plan** tile.
 
-   ![Screenshot 25](./media/image25.png)
+    ![Screenshot](media/image20.png)
 
-   The Microsoft **Pick an account** window opens.
+    The **New Plan** dialog opens.
 
-7. In the **Pick an account** window, select your lab user account.
+4.  In the **New Plan** dialog, in the **Name** field, enter
+    +++Acme_Beverages_Plan+++.
 
-   ![Screenshot 26](./media/image26.png)
+    ![Screenshot](media/image21.png)
 
-   The sign-in window closes, and you are signed in to the connection.
+5.  Confirm that **Location** shows
+    **Fabricplan-Day1@lab.LabInstance.Id** \> **Day1-Plan**.
 
-8. In the **Create New Connection** dialog, select **Create**.
+6.  Select **Create**.
 
-   The connection is created and the **Create New Connection** dialog closes.
+    The **Acme_Beverages_Plan** app opens to the **How Would You Like To
+    Get Started?** screen. The **Get data** section lists **Semantic
+    Model** and **Excel / CSV**. The **Create new sheet** section lists
+    **Planning**, **PowerTable**, and **Intelligence**.
 
-9. Verify that the connection you created appears in the **Connection** list of the **Create New Connection** dialog as **Acme_Beverages User1-64970352**.
+    ![Screenshot](media/image22.png)
 
-   ![Screenshot 27](./media/image27.png)
+    **Note:** The **Home** tab also shows **New Planning Sheet**, **New
+    PowerTable Sheet**, and **New Intelligence Sheet**. The **Explorer
+    (0)** pane shows that the app has no sheets yet.
 
-   > **Note:** The number after **User1-** matches your lab user account, so your connection name can show a different number.
+## Task 6: Connect to the semantic model
 
-10. In the **Select Semantic Model Connection** dialog, confirm that **Select a Connection** shows **Acme_Beverages User1-64970352**.
+In this task, you create a shared cloud connection and use it to connect
+the Plan app to a semantic model. Planning and BI sheets need this
+connection to read and use semantic model data.
 
-11. Under **Select Semantic model From**, confirm that **Semantic Model Item** is selected.
+1.  On the **How Would You Like To Get Started?** screen, under **Get
+    data**, select **Semantic Model**.
+
+    ![Screenshot](media/image23.png)
+
+    The **Select Semantic Model Connection** dialog opens.
+
+2.  In the **Select Semantic Model Connection** dialog, next to **Select
+    a Connection**, select **+ Create Connection**.
+
+    ![Screenshot](media/image24.png)
+
+    The **Create New Connection** dialog opens.
+
+    **Note:** The **Connection required** message explains that Planning
+    and BI sheet types need a shared cloud connection to access and use a
+    semantic model.
+
+3.  Under **Connection credentials**, confirm that **Connection** shows
+    **Create new connection**.
+
+4.  In the **Connection name** field, enter +++Acme_Beverages+++.
+
+5.  Confirm that **Authentication kind** shows **Organizational
+    account**.
+
+6.  Under **You are not signed in. Please sign in.**, select **Sign
+    in**.
+
+    ![Screenshot](media/image25.png)
+
+    The Microsoft **Pick an account** window opens.
+
+7.  In the **Pick an account** window, select your lab user account, for
+    example
+    [**User1-64970352@LODSPRODMCA.onmicrosoft.com**](mailto:User1-64970352@LODSPRODMCA.onmicrosoft.com).
+
+    ![Screenshot](media/image26.png)
+
+    The sign-in window closes, and you're signed in to the connection.
+
+    **Note:** Your lab user account is
+    +++@lab.CloudPortalCredential(User1).Username+++. The account shows
+    **Signed in** because you already signed in to Microsoft Fabric with
+    it.
+
+8.  In the **Create New Connection** dialog, confirm that **You are
+    currently signed in.** appears under **Authentication kind**.
+
+9.  Select **Create**.
+
+    ![Screenshot](media/image27.png)
+
+    The connection is created, and the **Create New Connection** dialog
+    closes. The new connection appears as **Acme_Beverages
+    User1-64970352**.
+
+    **Note:** The number after **User1-** matches your lab user account,
+    +++@lab.CloudPortalCredential(User1).Username+++. Your connection name
+    might show a different number.
+
+10. In the **Select Semantic Model Connection** dialog, confirm that
+    **Select a Connection** shows **Acme_Beverages User1-64970352**.
+
+11. Under **Select Semantic model From**, confirm that **Semantic Model
+    Item** is selected.
 
 12. Select the **Semantic Model** field.
 
-   ![Screenshot 28](./media/image28.png)
+    ![Screenshot](media/image28.png)
 
-   The **OneLake catalog** opens on the **Choose a semantic model** page.
+    The **OneLake catalog** opens on the **Choose a semantic model** page.
 
 13. In the semantic model list, select **ACME Beverages**.
 
+    **Note:** The **Owner** of the **ACME Beverages** semantic model is
+    your lab user account. Its **Location** is your lab workspace, for
+    example, **Fabricplan-Day1@lab.LabInstance.Id**.
+
 14. Select **Add**.
 
-   ![Screenshot 29](./media/image29.png)
+    ![Screenshot](media/image29.png)
 
-   The **OneLake catalog** closes, and the **Semantic Model** field shows **ACME Beverages**.
+    The **OneLake catalog** closes, and the **Semantic Model** field shows
+    **ACME Beverages**.
 
-15. In the **Select Semantic Model Connection** dialog, confirm that **Select a Connection** shows **Acme_Beverages User1-64970352** and **Semantic Model** shows **ACME Beverages**.
+15. In the **Select Semantic Model Connection** dialog, confirm that
+    **Select a Connection** shows **Acme_Beverages User1-64970352** and
+    **Semantic Model** shows **ACME Beverages**.
 
 16. Select **Connect**.
 
-   ![Screenshot 30](./media/image30.png)
+    ![Screenshot](media/image30.png)
 
-   The Plan app connects to the **ACME Beverages** semantic model.
+    The Plan app connects to the **ACME Beverages** semantic model.
 
-17. In the right pane, select the **Data** icon.
+17. In the sidebar on the right side of the Plan app, select the
+    **Data** icon.
 
-18. On the **Data** pane, expand **Semantic Model** and verify that the following tables appear: **Measure Table**, **Dim Countries**, **Dim Customers**, **Dim Date**, **Dim Regions**, **Dim skus**, **Fact Plan Forecast**, **Fact Transactions**, and **P&L Data**.
+    The **Data** pane opens.
 
-   ![Screenshot 31](./media/image31.png)
+18. On the **Data** pane, expand **Semantic Model**.
 
-   The dimension, measure, date, and fact tables from the **ACME Beverages** semantic model are available for planning.
+19. Verify that the following tables appear under **Semantic Model**:
 
-### Task 7: Create a new Planning sheet
+    - **Measure Table**
 
-In this task, you create a Planning sheet in the Plan app. You use this sheet to build the 2026 sales plan from the **ACME Beverages** semantic model data.
+    - **Dim Countries**
 
-1. On the launch screen, in the **Home** ribbon, select **New Planning Sheet**.
+    - **Dim Customers**
 
-   ![Screenshot 32](./media/image32.png)
+    - **Dim Date**
 
-   The **New Planning Sheet** dialog opens.
+    - **Dim Regions**
 
-2. In the **Name** field, enter the following:
+    - **Dim skus**
 
-   ```text
-   Plan Intro
-   ```
+    - **Fact Plan Forecast**
 
-   ![Screenshot 33](./media/image33.png)
+    - **Fact Transactions**
 
-3. Select **Create**.
+    - **P&L Data**
 
-   A new Planning sheet named **Plan Intro** opens.
+    ![Screenshot](media/image31.png)
 
-### Task 8: Assign dimensions to Rows
+    The dimension, measure, date, and fact tables from the **ACME
+    Beverages** semantic model are available for planning.
 
-In this task, you add the region and product dimensions to the rows of the Planning sheet. These fields set the levels at which you build and review the 2026 sales plan.
+## Task 7: Create a new Planning sheet
 
-1. On the **Data** pane, expand **Semantic Model** > **Dim Regions**.
+In this task, you create a Planning sheet in the Plan app. You use this
+sheet to build the 2026 sales plan from the **ACME Beverages** semantic
+model data.
 
-2. Drag **Region Name** into the **Rows** well in the **Fields** pane.
+1.  In the Plan app, on the **Home** tab, select **New Planning Sheet**.
 
-3. On the **Data** pane, expand **Dim skus**.
+    ![Screenshot](media/image32.png)
 
-4. Drag **Category** into the **Rows** well, below **Region Name**.
+    The **New Planning Sheet** dialog opens.
 
-5. Drag **Brand** into the **Rows** well, below **Category**.
+2.  In the **Name** field, enter +++Plan Intro+++.
 
-   ![Screenshot 34](./media/image34.png)
+    ![Screenshot](media/image33.png)
 
-   The **Rows** well lists **Region Name**, **Category**, and **Brand**, and the selected fields show a check mark on the **Data** pane.
+3.  Select **Create**.
 
-6. Verify that the Planning sheet grid lists each region, starting with **All** and **APAC**, with the brands and categories nested under it.
+    A new Planning sheet named **Plan Intro** opens.
 
-   ![Screenshot 35](./media/image35.png)
+## Task 8: Assign dimensions to rows
 
-   The status bar shows **Session ready** and the row count for the grid.
+In this task, you add the region and product dimensions to the rows of
+the Planning sheet. These fields set the levels at which you build and
+review the 2026 sales plan.
 
-### Task 9: Assign the date hierarchy to Columns
+1.  On the **Data** pane, expand **Semantic Model** \> **Dim Regions**.
 
-In this task, you add the date hierarchy to the columns of the Planning sheet. This lets you plan and compare values by year, quarter, and month.
+    The **Region Name** field appears under **Dim Regions**.
 
-1. On the **Data** pane, under **Semantic Model**, expand **Dim Date**.
+2.  In the sidebar on the right, select the **Fields** icon.
 
-2. Drag **Date Hierarchy** into the **Columns** well in the **Fields** pane.
+3.  Drag **Region Name** into the **Rows** well on the **Fields** pane.
 
-   ![Screenshot 36](./media/image36.png)
+    **Region Name** appears in the **Rows** well.
 
-   The **Columns** well shows **Date Hierarchy** with the levels **Year**, **Quarter Name**, and **Month Short Name**.
+4.  On the **Data** pane, expand **Dim skus**.
 
-3. Verify that the Planning sheet grid shows a **Year** column header above the **Region Name** rows.
+    The **Brand**, **Category**, **Multipack**, **Pack Format**, and **SKU
+    Code** fields appear under **Dim skus**.
 
-   ![Screenshot 37](./media/image37.png)
+5.  Drag **Category** into the **Rows** well, below **Region Name**.
 
-   The sheet title updates to **by Region Name, Brand, Category, Year, Quarter Name, Month Short Name**.
+6.  Drag **Brand** into the **Rows** well, below **Category**.
 
-### Task 10: Assign measures to Values
+    ![Screenshot](media/image34.png)
 
-In this task, you add the 2025 Gross Revenue measure to the values of the Planning sheet. This measure gives you the 2025 actuals that the bottom-up plan is built on.
+    The **Rows** well lists **Region Name**, **Category**, and **Brand**.
+    On the **Data** pane, the **Region Name**, **Brand**, and **Category**
+    check boxes are selected.
 
-1. On the **Data** pane, under **Semantic Model** > **Measure Table**, expand the **Revenue** folder.
+    **Important:** Keep the order **Region Name** → **Category** →
+    **Brand**. Exercise 3 depends on this order (for example, **NA** \>
+    **Beer** \> **Summit Lager**). Some screenshots in this exercise show
+    **Brand** above **Category**; if your **Rows** well shows that order,
+    drag **Category** above **Brand**.
 
-2. Drag **2025 Gross Revenue** into the **Values** well in the **Fields** pane.
+7.  Verify that the Planning sheet grid lists each region, starting with
+    **All** and **APAC**, with the product fields nested under each
+    region.
 
-   ![Screenshot 38](./media/image38.png)
+    ![Screenshot](media/image35.png)
 
-   The **Values** well shows **2025 Gross Revenue**, and the measure shows a check mark on the **Data** pane.
+    The status bar shows **Session ready** and the row count for the grid.
 
-3. Verify that the Planning sheet grid shows the **2025 Gross Revenue** column, labeled **in Millions**, under the **2025** year header.
+    **Note:** The order of the fields in the **Rows** well sets the
+    nesting in the grid. To change the nesting, drag a field up or down in
+    the **Rows** well. For example, place **Brand** above **Category** to
+    show each category under its brand.
 
-   ![Screenshot 39](./media/image39.png)
+## Task 9: Assign the date hierarchy to columns
 
-   The grid shows **17,888.87** for **All** and **2,152.03** for **APAC**.
+In this task, you add the date hierarchy to the columns of the Planning
+sheet. This lets you plan and compare values by year, quarter, and
+month.
 
-### Task 11: Confirm your matrix is ready
+1.  On the **Data** pane, under **Semantic Model**, expand **Dim Date**.
 
-In this task, you confirm that the Planning sheet matrix is complete and adjust the column width for readability. The matrix shows 2025 Gross Revenue by region, brand, and category across the date hierarchy.
+    The **Dim Date** fields appear, including **Date**, **Date
+    Hierarchy**, **Day**, **Month**, **Quarter**, and **Year**.
 
-1. Verify that the sheet title reads **2025 Gross Revenue by Region Name, Brand, Category, Year, Quarter Name, Month Short Name**.
+2.  Drag **Date Hierarchy** into the **Columns** well on the **Fields**
+    pane.
 
-2. Hover over the column header border between **Region Name** and **2025 Gross Revenue** until the sizing handle appears.
+    ![Screenshot](media/image36.png)
 
-   ![Screenshot 40](./media/image40.png)
+    The **Columns** well shows **Date Hierarchy** with the levels
+    **Year**, **Quarter Name**, and **Month Short Name**. On the **Data**
+    pane, the **Date Hierarchy** check box is selected.
 
-3. Drag the sizing handle to adjust the column width.
+3.  Verify that the Planning sheet grid shows a **Year** column header
+    above the **Region Name** rows.
 
-   The column resizes, and the status bar shows **Session ready** with **Rows: 125 Columns: 1**.
+    ![Screenshot](media/image37.png)
 
-### Task 12: Set up a database connection for collaboration
+    The grid shows the year values, for example **2024**, as column
+    headers. The sheet title reads **by Region Name, Category, Brand,
+    Year, Quarter Name, Month Short Name**.
 
-In this task, you create a Fabric SQL connection for the plan. Workspace **Viewers** need this connection to collaborate in Reading View.
+## Task 10: Assign measures to values
 
-1. In the **Extra configuration recommended** banner above the Planning sheet, select **Set up connection**.
+In this task, you add the **2025 Gross Revenue** measure to the values
+of the Planning sheet. This measure provides the 2025 actuals that the
+bottom-up plan is built on.
 
-   ![Screenshot 41](./media/image41.png)
+1.  On the **Data** pane, under **Semantic Model** \> **Measure Table**,
+    expand the **Revenue** folder.
 
-   The **Select Fabric SQL Connection** dialog opens.
+    The **Revenue** folder lists the measures **2025 Gross Revenue**,
+    **Gross Revenue**, **Revenue PY**, **Revenue YoY %**, **Revenue YTD**,
+    and **Total Net Revenue GC**.
 
-2. In the **Select Fabric SQL Connection** dialog, select **+ Create Connection**.
+2.  Drag **2025 Gross Revenue** into the **Values** well on the
+    **Fields** pane.
 
-   ![Screenshot 42](./media/image42.png)
+    ![Screenshot](media/image38.png)
 
-   The **Create New Connection** pane opens.
+    The **Values** well shows **2025 Gross Revenue**. On the **Data**
+    pane, the **2025 Gross Revenue** check box is selected.
 
-3. Under **Connection credentials**, select the **Connection** drop-down.
+3.  Verify that the Planning sheet grid shows the **2025 Gross Revenue**
+    column, labeled **in Millions**, under the **2025** year header.
 
-4. Select **Create new connection**.
+    ![Screenshot](media/image39.png)
 
-5. In the **Connection name** field, enter the following:
+    The grid shows **17,888.87** for **All** and **2,152.03** for
+    **APAC**.
 
-   ```text
-   Acme_Beverages
-   ```
+## Task 11: Confirm your matrix is ready
 
-6. Verify that **Authentication kind** is set to **Organizational account** and that the **You are currently signed in as** section shows your lab user account.
+In this task, you confirm that the Planning sheet matrix is complete and
+adjust the column width for readability. The matrix shows 2025 Gross
+Revenue by region, brand, and category across the date hierarchy.
 
-7. Select **Create**.
+1.  Verify that the sheet title reads **2025 Gross Revenue by Region
+    Name, Category, Brand, Year, Quarter Name, Month Short Name**.
 
-   ![Screenshot 43](./media/image43.png)
+2.  Point to the column header border between **Region Name** and **2025
+    Gross Revenue** until the sizing handle appears.
 
-   Fabric creates the connection and returns you to the **Select Fabric SQL Connection** dialog. Your account identifier is added to the connection name automatically.
+    ![Screenshot](media/image40.png)
 
-8. In the **Select a Connection** drop-down, verify that the new connection is selected. Its name starts with **Acme_Beverages** and is followed by your user identifier.
+3.  Drag the sizing handle to adjust the column width.
 
-   > **Note:** The user identifier and the number in parentheses after the connection name depend on your lab account. They might differ from the example.
+    The column resizes. The status bar shows **Session ready** with
+    **Rows: 125 Columns: 1**.
 
-9. Select **Connect**.
+## Task 12: Set up a database connection for collaboration
 
-   ![Screenshot 44](./media/image44.png)
+In this task, you create a Fabric SQL connection for the plan. Workspace
+viewers need this connection to collaborate in Reading view.
 
-   The dialog closes and the connection is set up for viewer collaboration.
+1.  In the **Extra configuration recommended** banner above the Planning
+    sheet, select **Set up connection**.
 
-10. In the upper-right corner, open the **Notifications** pane and verify that it shows the message **Connection saved successfully!**
+    ![Screenshot](media/image41.png)
 
-   ![Screenshot 45](./media/image45.png)
+    The **Select Fabric SQL Connection** dialog opens.
 
-   The SQL connection is established, and the Plan app is ready for collaboration.
+2.  In the **Select Fabric SQL Connection** dialog, select **+ Create
+    Connection**.
 
-## Exercise 2: Explore the interface
+    ![Screenshot](media/image42.png)
 
-In this exercise, you learn the ribbons, header, explorer pane, sidebar panels, and footer so that you can move around the planning environment confidently before you enter plan data.
+    The **Create New Connection** dialog opens.
 
-### Task 1: Explore the ribbons
+3.  Under **Connection credentials**, select the **Connection**
+    drop-down.
 
-In this task, you switch to the full ribbon view and review what each ribbon contains. Knowing where each command is helps you work faster in the later planning exercises.
+4.  Select **Create new connection**.
 
-1. Select the **Planning** tab.
+5.  In the **Connection name** field, enter +++Acme_Beverages+++.
 
-2. At the right end of the ribbon, select the down arrow to switch to the full ribbon view.
+6.  Verify that **Authentication kind** is set to **Organizational
+    account**.
 
-   ![Screenshot 46](./media/image46.png)
+7.  Verify that the **You are currently signed in as** section shows
+    your lab user account.
 
-   The ribbon expands and shows labeled command groups, such as **Layout & Number**, **Rows & Columns**, **Tools**, **Actions**, and **Default**.
+8.  Select **Create**.
 
-   ![Screenshot 47](./media/image47.png)
+    ![Screenshot](media/image43.png)
 
-3. Select the **Home** tab and review its commands.
+    Fabric creates the connection and returns you to the **Select Fabric
+    SQL Connection** dialog. Fabric adds your user identifier to the
+    connection name.
 
-   The **Home** ribbon contains **New Planning Sheet**, **New PowerTable Sheet**, and **New Intelligence Sheet**, which you use to add new sheets. It also contains **Explore Model**, **Settings**, and **Manage Connections**.
+9.  In the **Select a Connection** drop-down, verify that the selected
+    connection name starts with **Acme_Beverages**, followed by your
+    user identifier.
 
-4. Select the **Planning** tab and review its commands.
+    **Note:** The user identifier and the number in parentheses after the
+    connection name depend on your lab account. They might differ from the
+    example.
 
-   The **Planning** ribbon contains layout options (**Layout**, **Totals**), formatting options (**Quick format**, percentage, currency, and decimal buttons), row and column commands (**Insert Row**, **Manage Rows**, **Formula**, **Text**, **List**, **Number**, **Checkbox**, **Date**, **Simulate**, **Person**, **Manage measures**, **Show Columns**), **Tools**, and actions such as **Audit**, **Notes**, **Writeback**, **Reset**, **Export**, and **Undo**. In the compact ribbon view, the **Planning** ribbon also shows **Bulk Edit** and **Pivot**.
+10. Select **Connect**.
 
-   ![Screenshot 48](./media/image48.png)
+    **Note:** If the dialog asks for a database, select the SQL database
+    that you created in Task 4, for example **Acme_Beverages_JohnS**.
 
-5. Select the **Model** tab and review its commands.
+    ![Screenshot](media/image44.png)
 
-   ![Screenshot 49](./media/image49.png)
+    The **Select Fabric SQL Connection** dialog closes, and the plan uses
+    the **Acme_Beverages** connection for viewer collaboration.
 
-   The **Model** ribbon contains commands for forecasts, scenarios, driver-based models, and cubes. The **Rolling Forecast** group contains **Forecast**, **Extend Time**, **Reforecast Column**, **Reforecast Row**, **Distribute Deficit**, and **Predict**, a date range field that starts with **January 1st, 2024**, the **Show Closed Periods** check box, and **Close Period**. Until you create a forecast, **Forecast** is the only available command in this group.
+11. In the upper-right corner, select the **Notifications** icon.
 
-6. Select the **Format** tab and review its commands.
+    ![Screenshot](media/image45.png)
 
-   ![Screenshot 50](./media/image50.png)
+    The **Notifications** pane opens and confirms that the SQL connection
+    is set up.
 
-   The **Format** ribbon contains conditional formatting and semantic formatting options. It is organized into the following groups:
+# Exercise 2: Explore the interface
 
-   - **Display**: **Appearance**.
-   - **Font**: font name (**Segoe UI**), font size (**13**), increase and decrease font size, bold, italic, underline, fill color, font color, and borders.
-   - **Alignment**: text alignment, indent, and row height (**26**) options, and **Auto Fit**.
-   - **Page Setup**: **Page Break**.
+In this exercise, you explore the ribbons, header, Explorer pane,
+sidebar panels, and footer so that you can work confidently before you
+enter plan data.
 
-7. Select the **Writeback** tab and review its commands.
+## Task 1: Explore the ribbons
 
-   ![Screenshot 51](./media/image51.png)
+In this task, you switch to the full ribbon view and review the commands
+on each ribbon. Knowing where each command is helps you work faster in
+the later planning exercises.
 
-   The **Writeback** ribbon contains commands to write data to destinations, manage settings, and view logs. It is organized into the following groups:
+1.  Select the **Planning** tab.
 
-   - **Writeback**: **Writeback**.
-   - **Destination**: **Add destination** and **Manage**.
-   - **Data**: **WB Type**, **Filter**, and **Mapping**.
-   - **Logs**: **Logs**.
-   - **General**: **Settings**.
+2.  At the right end of the ribbon, select the down arrow to switch to
+    the full ribbon view.
 
-   **Writeback**, **Manage**, and **Logs** appear dimmed in the ribbon.
+    ![Screenshot](media/image46.png)
 
-### Task 2: Explore the header
+    The ribbon expands and shows labeled command groups, such as **Layout
+    & Number**, **Rows & Columns**, **Tools**, **Actions**, and
+    **Default**.
 
-In this task, you open each of the four settings in the header. You start with **Security**, where you set up read and write access for data input, scenarios, comments, and data writeback.
+    ![Screenshot](media/image47.png)
 
-1. In the header, select **Security**.
+3.  Select the **Home** tab.
 
-   ![Screenshot 52](./media/image52.png)
+    The **Home** ribbon contains the following commands:
 
-   The **Security** pane opens and lists the **Data Input**, **Forecast**, **Scenario**, **Comments**, and **Writeback** categories. **Data Input** is selected and shows the message **No data input columns available.**
+    - **New Planning Sheet**, **New PowerTable Sheet**, and **New
+      Intelligence Sheet**, which you use to add new sheets.
 
-2. On the **Security** page, under **Roles**, select **Users**.
+    - **Explore Model**, **Settings**, and **Manage Connections**.
 
-   ![Screenshot 53](./media/image53.png)
+4.  Select the **Planning** tab again.
 
-   The **Users** view opens with the message **No Users Available** and an **Assign Role** button. You use **Assign Role** to add users and map them to roles that manage access and security permissions.
+    ![Screenshot](media/image48.png)
 
-3. Under **Roles**, select **Roles**.
+    The **Planning** ribbon contains the following commands:
 
-   ![Screenshot 54](./media/image54.png)
+    - Layout options - **Layout** and **Totals**.
 
-   The **Roles (1)** list opens with the **Item Baseline** role, labeled **System Default**. The role settings are organized into the **General**, **Planning**, **PowerTable**, **Intelligence**, and **Reading View Customization** tabs. On the **General** tab, under **Select Sheets**, the **Plan Intro** sheet has **Visible** turned on and **Read Only** turned off. By default, all sheets are accessible to this role. You can configure individual sheets to restrict access or make them read-only, and you can select **Add Roles** to create more roles.
+    - Formatting options - **Quick format** and the percentage, currency,
+      and decimal buttons.
 
-4. Select **Back to Sheet**.
+    - Row and column commands - **Insert Row**, **Manage Rows**,
+      **Formula**, **Text**, **List**, **Number**, **Checkbox**, **Date**,
+      **Simulate**, **Person**, **Manage measures**, and **Show Columns**.
 
-   ![Screenshot 55](./media/image55.png)
+    - Tools - **Tools**.
 
-   The **Security** page closes and the sheet opens again.
+    - Actions - **Audit**, **Notes**, **Writeback**, **Reset**,
+      **Export**, and **Undo**.
 
-5. In the toolbar, select the **Comments** dropdown arrow.
+    **Note:** In the compact ribbon view, the **Planning** ribbon also
+    shows **Bulk Edit** and **Pivot**.
 
-   ![Screenshot 56](./media/image56.png)
+5.  Select the **Model** tab.
 
-   The menu opens and lists **Add new comment**, **View all comments**, and **Settings**. You use **Comments** to add comments to the plan and view all existing comments. **Add new comment** stays unavailable until you save your changes.
+    ![Screenshot](media/image49.png)
 
-6. In the toolbar, select the **Editing** dropdown.
+    The **Model** ribbon contains commands for forecasts, scenarios,
+    driver-based models, and cubes. The **Rolling Forecast** group
+    contains the following items:
 
-   ![Screenshot 57](./media/image57.png)
+    - Forecast commands - **Forecast**, **Extend Time**, **Reforecast
+      Column**, **Reforecast Row**, **Distribute Deficit**, and
+      **Predict**.
 
-   The menu lists two views. **Editing** (**Make any changes**) is selected by default. **Reading** (**View the file, but make no changes**) opens the sheet in read-only mode. Use this menu to switch between Editing view and Reading view.
+    - A date range field that starts with **January 1st, 2024**.
 
-7. In the toolbar, select **Save**.
+    - The **Show Closed Periods** check box.
 
-   ![Screenshot 58](./media/image58.png)
+    - **Close Period**.
 
-   Your changes to the sheet are saved.
+    **Note:** Until you create a forecast, **Forecast** is the only
+    available command in the **Rolling Forecast** group. The other
+    commands appear dimmed.
 
-   > **Note:** If the sheet has unsaved changes, pointing to **Comments** shows the message **Please save your changes to use Comments.** Select **Save** before you work with comments.
+6.  Select the **Format** tab.
 
-8. Select the **Save** dropdown arrow.
+    ![Screenshot](media/image50.png)
 
-   ![Screenshot 59](./media/image59.png)
+    The **Format** ribbon contains conditional formatting and semantic
+    formatting options. It's organized into the following groups:
 
-   The menu shows **Discard all settings**. This option removes all unsaved changes and keeps the last saved version of the sheet.
+    - **Display** - **Appearance**.
 
-   > **Note:** Do not select **Discard all settings** now. Select it only when you want to remove all unsaved changes.
+    - **Font** - Font name (**Segoe UI**), font size (**13**), increase
+      and decrease font size, bold, italic, underline, fill color, font
+      color, and borders.
 
-9. Next to **Explorer (1)**, select the collapse arrow (**«**).
+    - **Alignment** - Text alignment, indent, and row height (**26**)
+      options, and **Auto Fit**.
 
-   ![Screenshot 60](./media/image60.png)
+    - **Page Setup** - **Page Break**.
 
-   The **Explorer** pane collapses. Select the arrow again to expand the pane. In the **Explorer** pane, you select **+ New Sheet** to add a sheet, use the **Search** box to find sheets, and select a sheet in the list, such as **Plan Intro**, to open it.
+7.  Select the **Writeback** tab.
 
-10. In the sidebar on the right, select the **Data** icon.
+    ![Screenshot](media/image51.png)
 
-    ![Screenshot 61](./media/image61.png)
+    The **Writeback** ribbon contains commands to write data to
+    destinations, manage settings, and view logs. It's organized into the
+    following groups:
 
-    The **Data** panel opens. The sidebar has five panels, and you use the **Data** panel to manage data from the semantic model, sheets, or queries. The panel has three sections:
+    - **Writeback** - **Writeback**.
 
-    - **Semantic Model**: lists the model tables **Measure Table**, **Dim Countries**, **Dim Customers**, **Dim Date**, **Dim Regions**, **Dim skus**, **Fact Plan Forecast**, and **Fact Transactions**.
-    - **From Sheets**: lists data that comes from sheets.
-    - **Queries**: lists data that comes from queries.
+    - **Destination** - **Add destination** and **Manage**.
 
-11. In the sidebar, select the **Fields** icon.
+    - **Data** - **WB Type**, **Filter**, and **Mapping**.
 
-    ![Screenshot 62](./media/image62.png)
+    - **Logs** - **Logs**.
 
-    The **Fields** panel opens. You use this panel to map dimensions and measures into rows, columns, and values. The current sheet has the following mapping:
+    - **General** - **Settings**.
 
-    - **Rows**: **Region Name**, **Category**, and **Brand**. Select **+ Add Rows** to add more fields.
-    - **Columns**: **Date Hierarchy** with **Year**, **Quarter Name**, and **Month Short Name**. Select **+ Add Columns** to add more fields.
-    - **Values**: **2025 Gross Revenue**.
+    **Note:** **Writeback**, **Manage**, and **Logs** appear dimmed in the
+    ribbon.
 
-12. In the sidebar, select the **Filter** icon.
+## Task 2: Explore the header, Explorer pane, sidebar, and footer
 
-    ![Screenshot 63](./media/image63.png)
+In this task, you explore the header, the **Explorer** pane, the
+sidebar, and the footer of a Plan sheet. You review the security,
+comment, editing, and save commands, and the panels that manage data,
+fields, filters, comments, bookmarks, and parameters. These controls
+help you secure the plan and move around it before you enter data.
 
-    The **Filter** panel opens. You use this panel to apply page-level and global-level filters. Under **Page level**, the fields **Region Name**, **Category**, **Brand**, **Year**, **Quarter Name**, **Month Short Name**, and **2025 Gross Revenue** are all set to **is (All)**. Drag fields to **Add data fields here** to add more page-level filters. Use the **Global level** section to add filters at the global level.
+1.  In the header, select **Security**.
 
-13. In the sidebar, select the **Comments** icon.
+    ![Screenshot](media/image52.png)
 
-   ![Screenshot 64](./media/image64.png)
+    The **Security** pane opens and lists the **Data Input**,
+    **Forecast**, **Scenario**, **Comments**, and **Writeback**
+    categories. **Data Input** is selected and shows the message **No data
+    input columns available.**
 
-   The **All Comments** panel opens. You use this panel to view and manage comments. Use the **Search** box to find comments and the filter drop-down to filter them. The panel shows **No comments found** because no annotations exist yet. Start an annotation to view it in this panel.
+2.  In the **Security** pane, under **Roles**, select **Users**.
 
-14. In the sidebar, select the **Bookmark** icon.
+    ![Screenshot](media/image53.png)
 
-   ![Screenshot 65](./media/image65.png)
+    The **Users** view opens with the message **No Users Available** and
+    an **Assign Role** button. You use **Assign Role** to add users and
+    map them to roles that manage access and security permissions.
 
-   The **Bookmark** panel opens. You use this panel to manage bookmarks on the **Public** and **Private** tabs. Select **Add New** to create a bookmark. The panel shows **No bookmarks available.** because no bookmarks exist yet.
+3.  Under **Roles**, select **Roles**.
 
-15. In the sidebar, select the **Parameter** icon **{x}**.
+    ![Screenshot](media/image54.png)
 
-   ![Screenshot 66](./media/image66.png)
+    The **Roles (1)** list opens with the **Item Baseline** role, labeled
+    **System Default**. The role settings are on the following tabs:
 
-   The **Parameter** panel opens. You use this panel to add parameters on the **Page Level** and **Global Level** tabs. Select **+ Add new** to create a parameter. The panel shows **No Parameters Found** because no parameters exist yet.
+    - **General**
 
-16. In the footer, select **Rows: 125 Columns: 1**.
+    - **Planning**
 
-   ![Screenshot 67](./media/image67.png)
+    - **PowerTable**
 
-   Statistics for the dimensions and measures in the sheet open. The footer also shows **Session ready** and the **Sync** option.
+    - **Intelligence**
 
-17. In the footer, use the zoom slider or the **−** and **+** icons to adjust the canvas size.
+    - **Reading View Customization**
 
-   The canvas zooms out or in.
+    On the **General** tab, under **Select Sheets**, the **Plan Intro**
+    sheet has **Visible** turned on and **Read Only** turned off.
 
-18. In the footer, select the **Settings** icon to set the panel aggregation and the number of rows per page.
+    **Note:** By default, this role can access all sheets. You can
+    configure individual sheets to restrict access or make them read-only.
+    You can also select **Add Roles** to create more roles.
 
-![Screenshot 68](./media/image68.png)
+4.  In the **Security** pane, select **Back to Sheet**.
 
-## Exercise 3: Top-Down and Bottom-Up Planning
+    ![Screenshot](media/image55.png)
 
-In this exercise, you set a top-down 2026 Target distributed by prior-year weights, build a bottom-up 2026 Sales Plan from prior-year actuals with a brand-level adjustment, a trend distribution and a segment-wide uplift, and add inline comments and a **Status** column for row-level collaboration.
+    The **Security** pane closes, and the **Plan Intro** sheet opens.
 
-### Task 1: Expand the column hierarchy and enable column grand total
+5.  In the header, select the **Comments** drop-down arrow.
 
-In this task, you expand the **Year** column to show quarterly values and add a column grand total on the left of the sheet. Quarterly columns let you review and distribute the plan by period, and the grand total shows the full-year value for each row.
+    ![Screenshot](media/image56.png)
 
-1. On the **2026 Target** sheet, in the **Year** column header, select the expand icon **>** next to **2025**.
+    The menu opens with **Add new comment**, **View all comments**, and
+    **Settings**. You use **Comments** to add comments to the plan and to
+    view existing comments. **Add new comment** stays unavailable until
+    you save your changes.
 
-   ![Screenshot 69](./media/image69.png)
+6.  In the header, select the **Editing** drop-down arrow.
 
-   The **Year** column expands to show the quarters.
+    ![Screenshot](media/image57.png)
 
-2. Review the **Quarter Name** row, which now shows **Q1**, **Q2**, **Q3** and **Q4** under **2025**, each with a **2025 Gross Revenue** column in millions.
+    The menu lists the following views:
 
-   ![Screenshot 70](./media/image70.png)
+    - **Editing** (**Make any changes**) is selected by default.
 
-   The sheet displays **2025 Gross Revenue** by quarter, for example **4,473.63** for **All** in **Q1**.
+    - **Reading** (**View the file, but make no changes**) opens the sheet
+      in read-only mode.
 
-3. On the ribbon, select the **Planning** tab.
+    You use this menu to switch between the Editing view and the Reading
+    view.
 
-4. In the **Planning** ribbon, select **Totals**.
+7.  In the toolbar, select **Save**.
 
-   The **Totals** menu opens with the **Row Grand Total**, **Column Grand Total**, **Row Subtotal** and **Column Subtotal** options.
+    ![Screenshot](media/image58.png)
 
-5. In the **Column Grand Total** drop-down, which is set to **Off**, select **Left**.
+    Your changes to the sheet are saved.
 
-   ![Screenshot 71](./media/image71.png)
+    **Note:** If the sheet has unsaved changes, pointing to **Comments**
+    shows the message **Please save your changes to use Comments.** Select
+    **Save** before you work with comments.
 
-   A column grand total appears on the left of the quarterly columns.
+8.  In the toolbar, select the **Save** drop-down arrow.
 
-6. Review the **Grand Total** column on the left of the sheet, which shows the full-year **2025 Gross Revenue** values next to the quarterly values.
+    ![Screenshot](media/image59.png)
 
-   ![Screenshot 72](./media/image72.png)
+    The menu opens and shows the **Discard all settings** option. This
+    option removes all unsaved changes and keeps the last saved version of
+    the sheet.
 
-   The **Grand Total** column shows the full-year 2025 actuals, for example **17,888.87** for **All** and **2,152.03** for **APAC**.
+    **Important:** Don't select **Discard all settings** now. Select it
+    only when you want to remove all unsaved changes.
 
-### Task 2: Insert the 2026 Target input column
+9.  Next to **Explorer (1)**, select the collapse arrow (**«**).
 
-In this task, you create a **2026 Target** input series by copying the **2025 Gross Revenue** series. The new column starts with the 2025 actuals, which gives Finance a baseline to adjust when setting the top-down revenue target.
+    ![Screenshot](media/image60.png)
 
-1. In the **Planning** ribbon, select **Number** > **Copy from another series** > **2025 Gross Revenue**.
+    The **Explorer** pane collapses, and the sheet canvas gets more space.
 
-   ![Screenshot 73](./media/image73.png)
+10. Select the expand arrow (**»**) to expand the **Explorer** pane
+    again.
 
-   The **Data Input** pane opens.
+    The **Explorer** pane opens. In the **Explorer** pane, you can do the
+    following:
 
-2. In the **Title** field, enter the following:
+    - Select **+ New Sheet** to add a sheet.
 
-   ```text
-   2026 Target
-   ```
+    - Use the **Search** box to find sheets.
 
-   ![Screenshot 74](./media/image74.png)
+    - Select a sheet in the list, for example **Plan Intro**, to open it.
 
-3. Leave **Insert as** set to **Visual Measure**, **Input type** set to **Number** and **Column aggregation type** set to **Sum**.
+11. In the sidebar on the right, select the **Data** icon.
 
-4. Select **Create**.
+    ![Screenshot](media/image61.png)
 
-   The **2026 Target** column is created next to each **2025 Gross Revenue** column.
+    The **Data** panel opens. The sidebar has six panels. You use the
+    **Data** panel to manage data from the semantic model, sheets, or
+    queries. The panel has three sections:
 
-5. Review the **2026 Target** column in the **Grand Total** and in each quarter (**Q1**, **Q2**, **Q3** and **Q4**).
+    - **Semantic Model** - Lists the model tables **Measure Table**, **Dim
+      Countries**, **Dim Customers**, **Dim Date**, **Dim Regions**, **Dim
+      skus**, **Fact Plan Forecast**, **Fact Transactions**, and **P&L
+      Data**.
 
-   ![Screenshot 75](./media/image75.png)
+    - **From Sheets** - Lists data that comes from sheets.
 
-   The **2026 Target** column contains the 2025 values, for example **17,888.87** for **All** in the **Grand Total** and **4,473.63** for **All** in **Q1**.
+    - **Queries** - Lists data that comes from queries.
 
-### Task 3: Enter the top-level target
+12. In the sidebar, select the **Fields** icon.
 
-In this task, you enter the full-year 2026 revenue target in the **Grand Total** cell of the **2026 Target** column. Plan distributes the value down to every region, category and brand based on the 2025 gross revenue mix, which gives Finance a top-down starting point.
+    ![Screenshot](media/image62.png)
 
-1. In the **Grand Total** column, double-click the **2026 Target** cell in the **All** row.
+    The **Fields** panel opens. You use this panel to map dimensions and
+    measures to rows, columns, and values. The current sheet has the
+    following mapping:
 
-   The cell shows **17,888.87** and the formula bar becomes active.
+    - **Rows** - **Region Name**, **Category**, and **Brand**. Select **+
+      Add Rows** to add more fields.
 
-2. In the formula bar, enter the following:
+    - **Columns** - **Date Hierarchy** with **Year**, **Quarter Name**,
+      and **Month Short Name**. Select **+ Add Columns** to add more
+      fields.
 
-   ```text
-   18.5b
-   ```
+    - **Values** - **2025 Gross Revenue**.
 
-   The formula bar shows **18,500,000,000** as a preview of the value.
+13. In the sidebar, select the **Filter** icon.
 
-3. Select the check mark to the right of the formula bar.
+    ![Screenshot](media/image63.png)
 
-   ![Screenshot 76](./media/image76.png)
+    The **Filter** panel opens. You use this panel to filter the data in
+    the sheet. The **Page level** section lists a filter card for each
+    field in the sheet. Each card is set to **is (All)**:
 
-   The **2026 Target** cell for **All** in the **Grand Total** column shows **18,500.00**.
+    - **Region Name**
 
-4. Review the **2026 Target** values for the regions, brands and quarters.
+    - **Category**
 
-   ![Screenshot 77](./media/image77.png)
+    - **Brand**
 
-   The $18.5B target is distributed proportionally to all regions, categories and brands based on the 2025 gross revenue mix. Regions and brands with higher 2025 actuals receive a larger share of the target. For example, **APAC** shows **2,225.55** and **Q1** for **All** shows **4,626.46**.
+    - **Year**
 
-### Task 4: Apply an H2 skew
+    - **Quarter Name**
 
-In this task, you lock the **Q1** and **Q2** targets so that later changes to the full-year target flow only to the second half of the year. This lets Finance weight growth toward H2 without changing the first-half values.
+    - **Month Short Name**
 
-1. In the **Q1** column, select the **2026 Target** cell in the **All** row.
+    - **2025 Gross Revenue**
 
-   The cell shows **4,626.46**, and the distribution icon appears to the right of the cell.
+    You can drag more fields to **Add data fields here**. The **Global
+    level** section holds filters that apply beyond the current page.
 
-2. Select the distribution icon next to the selected cell.
+14. In the sidebar, select the **Comments** icon.
 
-   A menu opens with distribution and lock options.
+    ![Screenshot](media/image64.png)
 
-3. Select **Lock all children**.
+    The **All Comments** panel opens. You use this panel to view and
+    manage comments on the sheet. The panel has the following controls:
 
-   ![Screenshot 78](./media/image78.png)
+    - **Search** - Finds comments by text.
 
-   The **Q1** **2026 Target** cell and all cells below it are locked.
+    - Filter drop-down - Filters the list of comments.
 
-4. In the **Q2** column, select the **2026 Target** cell in the **All** row.
+    The panel shows **No comments found** because no annotations exist
+    yet. After you add a comment, it appears in this panel.
 
-   The cell shows **4,635.68**.
+15. In the sidebar, select the **Bookmark** icon.
 
-5. Select the distribution icon next to the selected cell.
+    ![Screenshot](media/image65.png)
 
-6. Select **Lock all children**.
+    The **Bookmark** panel opens. You use this panel to manage bookmarks
+    on the **Public** and **Private** tabs. You can select **Add New** to
+    create a bookmark. The panel shows **No bookmarks available.** because
+    no bookmarks exist yet.
 
-   ![Screenshot 79](./media/image79.png)
+16. In the sidebar, select the **Parameter** icon (**{x}**).
 
-   The **2026 Target** columns for **Q1** and **Q2** turn grey to show that they are locked.
+    ![Screenshot](media/image66.png)
 
-> **Note:** When you enter a new value in the **Grand Total** cell, Plan skips the locked quarters and distributes the value only to the unlocked periods (**Q3** and **Q4**).
+    The **Parameter** panel opens. You use this panel to add parameters on
+    the **Page Level** and **Global Level** tabs. You can select **+ Add
+    new** to create a parameter. The panel shows **No Parameters Found**
+    because no parameters exist yet.
 
-7. In the **Grand Total** column, select the **2026 Target** cell in the **All** row.
+17. In the footer of the sheet, select **Rows: 125 Columns: 1**.
 
-   The cell shows **18,500.00**, and its value appears in the formula bar above the grid.
+    ![Screenshot](media/image67.png)
 
-8. In the formula bar, replace the current value with the following:
+    The statistics for the dimensions and measures in the sheet appear.
+    The sheet **2025 Gross Revenue by Region Name, Category, Brand, Year,
+    Quarter Name, Month Short Name** has 125 rows and 1 column. The footer
+    also shows **Session ready** and the **Sync** option.
 
-   ```text
-   18.75b
-   ```
+18. In the footer, use the zoom slider or the **−** and **+** icons to
+    adjust the canvas size.
 
-   ![Screenshot 80](./media/image80.png)
+    The canvas zooms in or out, and the zoom box shows the current zoom
+    level, for example **100 %**.
 
-   A preview below the formula bar shows **18,750,000,000**.
+19. In the footer, select the **Settings** icon.
 
-9. Press **Enter**.
+    ![Screenshot](media/image68.png)
 
-   ![Screenshot 81](./media/image81.png)
+    The **Settings** options for the sheet open.
 
-   The **Grand Total** **2026 Target** cell for **All** shows **18,750.00**. Plan distributes the additional $0.25B only across **Q3** and **Q4**, and the locked **Q1** value stays at **4,626.46**.
+# Exercise 3: Top-down and bottom-up planning
 
-10. In the **Q1** column, select the **2026 Target** cell in the **All** row.
+In this exercise, you set a top-down 2026 target, build a bottom-up 2026
+sales plan from prior-year actuals, and add inline comments and a
+**Status** column for row-level collaboration.
 
-    The cell shows **4,626.46**, and the distribution icon appears to the right of the cell.
+## Task 1: Expand the column hierarchy and enable the column grand total
+
+In this task, you expand the **Year** column to show quarterly values
+and add a column grand total on the left of the sheet. Quarterly columns
+let you review and distribute the plan by period. The grand total shows
+the full-year value for each row.
+
+1.  On the **Plan Intro** sheet, in the **Year** column header, select
+    the expand icon (**\>**) next to **2025**.
+
+    ![Screenshot](media/image69.png)
+
+    The **Year** column expands to show the quarters.
+
+2.  Review the **Quarter Name** row, which shows **Q1**, **Q2**, **Q3**,
+    and **Q4** under **2025**.
+
+    ![Screenshot](media/image70.png)
+
+    The sheet shows **2025 Gross Revenue** by quarter, for example
+    **4,473.63** for **All** in **Q1**.
+
+3.  On the ribbon, select the **Planning** tab.
+
+4.  On the **Planning** tab, select **Totals**.
+
+    The **Totals** menu opens with the **Row Grand Total**, **Column Grand
+    Total**, **Row Subtotal**, and **Column Subtotal** options.
+
+5.  In the **Column Grand Total** list, which is set to **Off**, select
+    **Left**.
+
+    ![Screenshot](media/image71.png)
+
+    A **Grand Total** column appears on the left of the quarterly columns.
+
+6.  Review the **Grand Total** column on the left of the sheet, which
+    shows the full-year **2025 Gross Revenue** values next to the
+    quarterly values.
+
+    ![Screenshot](media/image72.png)
+
+    The **Grand Total** column shows the full-year 2025 actuals, for
+    example **17,888.87** for **All** and **2,152.03** for **APAC**.
+
+## Task 2: Insert the 2026 Target input column
+
+In this task, you create a **2026 Target** input series by copying the
+**2025 Gross Revenue** series. The new column starts with the 2025
+actuals. This gives Finance a baseline to adjust when setting the
+top-down revenue target.
+
+1.  On the **Planning** tab, select **Number** \> **Copy from another
+    series** \> **2025 Gross Revenue**.
+
+    ![Screenshot](media/image73.png)
+
+    The **Data Input** pane opens.
+
+2.  In the **Title** field, enter the following value:
+
+    +++2026 Target+++
+
+    ![Screenshot](media/image74.png)
+
+3.  Verify that the following fields keep their default values:
+
+    - Insert as - **Visual Measure**
+
+    - Input type - **Number**
+
+    - Column aggregation type - **Sum**
+
+4.  Select **Create**.
+
+    A **2026 Target** column appears next to each **2025 Gross Revenue**
+    column.
+
+5.  Review the **2026 Target** values under **Grand Total** and under
+    each quarter (**Q1**, **Q2**, **Q3**, and **Q4**).
+
+    ![Screenshot](media/image75.png)
+
+    The **2026 Target** values match the **2025 Gross Revenue** values.
+    For example, the **Grand Total** shows **17,888.87** for **All**, and
+    **Q4** shows **4,466.25** for **All**.
+
+## Task 3: Enter the top-level target
+
+In this task, you enter the full-year 2026 revenue target in the **Grand
+Total** cell of the **2026 Target** column. Plan distributes the value
+to every region, category, and brand based on the 2025 gross revenue
+mix. This gives Finance a top-down starting point.
+
+1.  In the **Grand Total** column, double-click the **2026 Target** cell
+    in the **All** row.
+
+    The cell shows **17,888.87**, and the formula bar becomes active.
+
+2.  In the formula bar, enter the following value:
+
+    +++18.5b+++
+
+    The formula bar shows **18,500,000,000** as a preview of the value.
+
+3.  Select the check mark icon to the right of the formula bar.
+
+    ![Screenshot](media/image76.png)
+
+    The **2026 Target** cell for **All** in the **Grand Total** column
+    shows **18,500.00**.
+
+4.  Review the **2026 Target** values for the regions, brands, and
+    quarters.
+
+    ![Screenshot](media/image77.png)
+
+    The \$18.5B target is distributed proportionally to all regions,
+    categories, and brands based on the 2025 gross revenue mix. Regions
+    and brands with higher 2025 actuals receive a larger share of the
+    target. For example, **APAC** shows **2,225.55**, and **Q1** shows
+    **4,626.46** for **All**.
+
+## Task 4: Apply an H2 skew
+
+In this task, you lock the **Q1** and **Q2** targets so that later
+changes to the full-year target flow only to the second half of the
+year. This lets Finance weight growth toward H2 without changing the
+first-half values.
+
+1.  In the **Q1** column, select the **2026 Target** cell in the **All**
+    row.
+
+    The cell shows **4,626.46**, and the distribution icon appears to the
+    right of the cell.
+
+2.  Select the distribution icon next to the selected cell.
+
+    A menu opens with distribution and lock options.
+
+3.  Select **Lock all children**.
+
+    ![Screenshot](media/image78.png)
+
+    The **Q1** **2026 Target** cell and all cells below it are locked.
+
+4.  In the **Q2** column, select the **2026 Target** cell in the **All**
+    row.
+
+    The cell shows **4,635.68**.
+
+5.  Select the distribution icon next to the selected cell.
+
+6.  Select **Lock all children**.
+
+    ![Screenshot](media/image79.png)
+
+    The **Q2** **2026 Target** cell and all cells below it are locked. The
+    locked **Q1** and **Q2** **2026 Target** columns appear shaded.
+
+    **Note:** When you enter a new value in the **Grand Total** cell, Plan
+    skips the locked quarters. It distributes the value only to the
+    unlocked periods, **Q3** and **Q4**.
+
+7.  In the **Grand Total** column, select the **2026 Target** cell in
+    the **All** row.
+
+    The cell shows **18,500.00**, and its value appears in the formula bar
+    above the grid.
+
+8.  In the formula bar, replace the current value with the following
+    value:
+
+    +++18.75b+++
+
+    ![Screenshot](media/image80.png)
+
+    A preview below the formula bar shows **18,750,000,000**.
+
+9.  Press **Enter**, or select the check mark (**✓**) to the right of
+    the formula bar.
+
+    ![Screenshot](media/image81.png)
+
+    The **Grand Total** **2026 Target** cell in the **All** row shows
+    **18,750.00**. Plan distributes the additional \$0.25B only across
+    **Q3** and **Q4**. The locked **Q1** value stays at **4,626.46**, and
+    the locked **Q2** value stays at **4,635.68**.
+
+10. In the **Q1** column, select the **2026 Target** cell in the **All**
+    row.
+
+    The cell shows **4,626.46**, and the distribution icon appears to the
+    right of the cell.
 
 11. Select the distribution icon next to the selected cell.
 
-    A menu opens with the **Unlock this cell** and **Unlock all children** options.
+    A menu opens with the **Unlock this cell** and **Unlock all children**
+    options.
 
 12. Select **Unlock all children**.
 
-    ![Screenshot 82](./media/image82.png)
+    ![Screenshot](media/image82.png)
 
     The **Q1** **2026 Target** cell and all cells below it are unlocked.
 
-13. In the **Q2** column, select the **2026 Target** cell in the **All** row.
+13. In the **Q2** column, select the **2026 Target** cell in the **All**
+    row.
 
     The cell shows **4,635.68**.
 
@@ -823,751 +1293,1090 @@ In this task, you lock the **Q1** and **Q2** targets so that later changes to th
 
 15. Select **Unlock all children**.
 
-    ![Screenshot 83](./media/image83.png)
+    ![Screenshot](media/image83.png)
 
-    The grey shading is removed from the **Q1** and **Q2** **2026 Target** columns, which shows that these cells are no longer locked. The **Total** **2026 Target** for **All** remains **18,750.00**.
+    The **Q2** **2026 Target** cell and all cells below it are unlocked,
+    and the **Q1** and **Q2** columns are no longer shaded. The **2026
+    Target** values in the **All** row keep the H2 skew. **Q1** shows
+    **4,626.46**, **Q2** shows **4,635.68**, **Q3** shows **4,744.03**,
+    and **Q4** shows **4,743.83**. The **Grand Total** **2026 Target**
+    cell in the **All** row remains **18,750.00**.
 
-> **Note:** In practice, top-down and bottom-up planning are typically done on separate sheets at different levels of granularity. Finance works from the total down, while Sales builds from the detail up. For this training, both are demonstrated on the same sheet to keep the setup simple and focused on the mechanics.
+    **Note:** In practice, teams typically do top-down and bottom-up
+    planning on separate sheets at different levels of granularity.
+    Finance works from the total down, and Sales builds from the detail
+    up. This lab shows both on the same sheet to keep the setup focused on
+    the mechanics.
 
-### Task <VALUE>: Insert the 2026 Sales Plan input column
+## Task 5: Insert the 2026 Sales Plan input column
 
-In this task, you create a **2026 Sales Plan** input column by copying the **2025 Gross Revenue** series. This gives Sales a bottom-up starting point that is pre-populated with 2025 actuals, which you adjust in later tasks.
+In this task, you create a **2026 Sales Plan** input column by copying
+the **2025 Gross Revenue** series. This column gives Sales a bottom-up
+starting point that is pre-populated with 2025 actuals. You adjust these
+values in later tasks.
 
-1. On the **Planning** ribbon, in the **Rows & Columns** group, select **Number**.
+1.  On the **Planning** tab, in the **Rows & Columns** group, select
+    **Number**.
 
-   A menu opens with the **Insert a new empty series** and **Copy from another series** options.
+    A menu opens with the **Insert a new empty series** and **Copy from
+    another series** options.
 
-2. Select **Copy from another series** > **2025 Gross Revenue**.
+2.  Select **Copy from another series** \> **2025 Gross Revenue**.
 
-   ![Screenshot 84](./media/image84.png)
+    ![Screenshot](media/image84.png)
 
-   The **Data Input** pane opens on the right side of the sheet.
+    The **Data Input** pane opens on the right side of the sheet.
 
-3. In the **Title** field, enter the following:
+3.  In the **Title** field, enter the following value:
 
-   ```text
-   2026 Sales Plan
-   ```
+    +++2026 Sales Plan+++
 
-4. Confirm that the remaining fields are set as follows:
+4.  Confirm that the remaining fields in the **Data Input** pane are set
+    as follows:
 
-   - **Insert as**: **Visual Measure**
-   - **Input type**: **Number**
-   - **Column aggregation type**: **Sum**
-   - **Row aggregation type**: **Sum**
-   - **Distribute parent value to children**: selected
+    - Insert as - **Visual Measure**
 
-5. Select **Create**.
+    - Input type - **Number**
 
-   ![Screenshot 85](./media/image85.png)
+    - Column aggregation type - **Sum**
 
-   The **2026 Sales Plan** column is added next to **2026 Target** in each period and is pre-populated with the 2025 values. For example, the **Grand Total** **2026 Sales Plan** cell for **All** shows **17,888.87**, and the **Q1** cell for **All** shows **4,473.63**. The **Manage measures** counter on the ribbon changes to **2**.
+    - Row aggregation type - **Sum**
 
-   ![Screenshot 86](./media/image86.png)
+    - Distribute parent value to children - selected
 
-### Task <VALUE>: Summit Lager holds steady in NA
+5.  Select **Create**.
 
-In this task, you show all rows on one page, collapse the row hierarchy to the region level, and then drill into North America to find the Summit Lager row. This prepares the row you adjust for the agreed Summit Lager plan in North America.
+    ![Screenshot](media/image85.png)
 
-1. In the status bar at the bottom of the sheet, select the **Settings** (gear) icon.
+    The **2026 Sales Plan** column appears next to **2026 Target** in each
+    period. The column is pre-populated with the 2025 values. For example,
+    the **Grand Total** **2026 Sales Plan** cell in the **All** row shows
+    **17,888.87**, and the **Q1** cell in the **All** row shows
+    **4,473.63**. The counter on **Manage measures** on the ribbon changes
+    to **2**.
 
-   The **Settings** pane opens with the **Panel Aggregation** and **Rows Per Page** fields.
+    ![Screenshot](media/image86.png)
 
-2. Select the **Rows Per Page** dropdown, which is set to **Auto**.
+## Task 6: Adjust the Summit Lager plan in North America
 
-3. Select **All**.
+In this task, you show all rows on one page and collapse the row
+hierarchy to the region level. You then raise the **2026 Sales Plan**
+value for **Summit Lager** in North America and distribute it across the
+quarters with a growth trend. This shows how one change at the top level
+rolls up through the hierarchy and spreads to the quarterly values.
 
-   ![Screenshot 87](./media/image87.png)
+1.  In the status bar in the lower-right corner of the sheet, select the
+    **Settings** (gear) icon.
 
-   All rows of the sheet are shown on a single page.
+    The **Settings** pane opens with the **Panel Aggregation** and **Rows
+    Per Page** fields.
 
-4. Hover over the **APAC** row, and then select the row gripper icon that appears to the left of the row.
+2.  Select the **Rows Per Page** list, which is set to **Auto**.
 
-   A menu opens with the **Select**, **Expand**, **Collapse**, **Insert**, **Actions**, and **Audit** options.
+3.  Select **All**.
 
-5. Select **Collapse** > **Specific Level** > **Region Name**.
+    ![Screenshot](media/image87.png)
 
-   ![Screenshot 88](./media/image88.png)
+    All rows of the sheet appear on a single page.
 
-   The row hierarchy collapses to the region level. The sheet shows only the **All**, **APAC**, **EU**, **LA**, and **NA** rows.
+4.  Point to the **APAC** row, and then select the row gripper icon that
+    appears to the left of it.
 
-   ![Screenshot 89](./media/image89.png)
+    A menu opens with the **Select**, **Expand**, **Collapse**,
+    **Insert**, **Actions**, and **Audit** options.
 
-6. Select the expand icon (**⊞**) next to **NA**.
+5.  Select **Collapse** \> **Specific Level** \> **Region Name**.
 
-   The **NA** row expands and shows the **Beer**, **Hard Seltzer**, and **Non-Alcoholic** category rows.
+    ![Screenshot](media/image88.png)
 
-7. Select the expand icon (**⊞**) next to **Beer**.
+    The row hierarchy collapses to the region level. The sheet shows only
+    the **All**, **APAC**, **EU**, **LA**, and **NA** rows.
 
-   ![Screenshot 90](./media/image90.png)
+    ![Screenshot](media/image89.png)
 
-   The **Beer** row expands and lists its brands, including the **Summit Lager** row. In the **Grand Total** columns, **Summit Lager** shows **4,395.74** for **2025 Gross Revenue**, **4,607.33** for **2026 Target**, and **4,395.74** for **2026 Sales Plan**.
+6.  Select the expand icon (**⊞**) next to **NA**.
 
-8. In the **Summit Lager** row, double-click the **Grand Total** cell in the **2026 Sales Plan** column.
+    The **NA** row expands and shows the **Beer**, **Hard Seltzer**, and
+    **Non-Alcoholic** category rows.
 
-   The cell switches to edit mode, and the formula bar shows the existing value **4395741014.28001**.
+    **Note:** The category rows appear under **NA** when **Category** is
+    above **Brand** in the **Rows** well of the **Fields** pane. In that
+    case, the sheet title reads **...by Region Name, Category, Brand...**.
+    If brands appear under **NA** instead, check the order of the fields
+    in the **Rows** well.
 
-9. Place the cursor at the end of the existing value in the formula bar, and then enter the following:
+7.  Select the expand icon (**⊞**) next to **Beer**.
 
-   ```text
-   +8%
-   ```
+    The **Beer** row expands and shows its brand rows, including **Artisan
+    Ale**, **Cosmic Craft**, **Eclipse Light**, **Old Mill**,
+    **Riverbend**, and **Summit Lager**. In the **Grand Total** columns,
+    the **Summit Lager** row shows **4,395.74** for **2025 Gross Revenue**
+    and **4,607.33** for **2026 Target**.
 
-   ![Screenshot 91](./media/image91.png)
+    ![Screenshot](media/image90.png)
 
-   A preview below the formula bar shows the new value **4,747,400,295.422**.
+8.  In the **Summit Lager** row, double-click the **Grand Total** cell
+    in the **2026 Sales Plan** column.
 
-10. Press **Enter**.
+    The cell switches to edit mode. Before the change, the cell shows
+    **4,395.74**. The formula bar shows the existing value
+    **4395741014.28001**.
 
-    ![Screenshot 92](./media/image92.png)
+9.  In the formula bar, place the cursor at the end of the existing
+    value.
 
-    The **Values saved** notification appears, and the **Summit Lager** **2026 Sales Plan** **Grand Total** changes to **4,747.40**. The change rolls up through the hierarchy: **Beer** changes to **8,386.03**, **NA** changes to **9,572.22**, and **All** changes to **18,240.53**.
+10. Type **+8%** (a plus sign followed by 8%), so that the formula bar
+    shows the existing value followed by **+8%**.
 
-11. Select the **Grand Total** cell for **Summit Lager** in the **2026 Sales Plan** column.
+    ![Screenshot](media/image91.png)
+
+    A preview below the formula bar shows the new value
+    **4,747,400,295.422**.
+
+11. Press **Enter**.
+
+    ![Screenshot](media/image92.png)
+
+    The **Values saved** notification appears. In the **Summit Lager**
+    row, the **Grand Total** for **2026 Sales Plan** changes to
+    **4,747.40**. The change rolls up through the hierarchy:
+
+    - **Beer** changes to **8,386.03**.
+
+    - **NA** changes to **9,572.22**.
+
+    - **All** changes to **18,240.53**.
+
+12. In the **Summit Lager** row, select the **Grand Total** cell in the
+    **2026 Sales Plan** column.
 
     The distribution icon appears next to the cell.
 
-12. Select the distribution icon (**⌄**) next to the cell.
+13. Select the distribution icon (**⌄**) next to the cell.
 
-    A menu opens with the **Distribute equally**, **Distribute to column with trend**, **Distribute to columns by weights of 2025 Gross Revenue**, **Distribute to columns by weights of 2026 Target**, **Distribute to columns by weights of 2026 Sales Plan**, **Lock this cell**, and **Lock all children** options.
+    A menu opens with the following options:
 
-13. Select **Distribute to column with trend**.
+    - **Distribute equally**
+
+    - **Distribute to column with trend**
+
+    - **Distribute to columns by weights of 2025 Gross Revenue**
+
+    - **Distribute to columns by weights of 2026 Target**
+
+    - **Distribute to columns by weights of 2026 Sales Plan**
+
+    - **Lock this cell**
+
+    - **Lock all children**
+
+14. Select **Distribute to column with trend**.
 
     A slider and the **Input custom value** option appear.
 
-14. Drag the slider to **4%**.
+15. Drag the slider to **4%**.
 
-    ![Screenshot 93](./media/image93.png)
+    ![Screenshot](media/image93.png)
 
-    The adjusted annual total of **4,747.40** is distributed across the quarters with a 4% growth trend.
+    The adjusted annual total of **4,747.40** is distributed across the
+    quarters with a 4% growth trend.
 
-15. Scroll right and review the quarterly **2026 Sales Plan** values in the **Summit Lager** row.
+16. Scroll right to review the quarterly **2026 Sales Plan** values in
+    the **Summit Lager** row.
 
-    ![Screenshot 94](./media/image94.png)
+    ![Screenshot](media/image94.png)
 
-    **Q1** receives the smallest share and **Q4** receives the largest. The values are **986.27** for **Q1**, **1,109.42** for **Q2**, **1,247.94** for **Q3**, and **1,403.77** for **Q4**.
+    The quarterly values increase from quarter to quarter:
 
-### Task <N>: Apply a summer Q3 uplift across key markets
+    - **Q1** - **986.27**
 
-In this task, you use **Bulk Edit** to apply an 8% uplift to the **2026 Sales Plan** for Beer and Hard Seltzer in the EU and Latin America during Q3. This applies the summer promotion to the whole segment in one action, so you don't need to edit each cell.
+    - **Q2** - **1,109.42**
 
-1. On the **Planning** ribbon, in the **Tools** group, select **Bulk Edit**.
+    - **Q3** - **1,247.94**
 
-   ![Screenshot 95](./media/image95.png)
+    - **Q4** - **1,403.77**
 
-   The **Bulk Edit** dialog opens.
+    **Q1** receives the smallest share of the annual total, and **Q4**
+    receives the largest.
 
-2. In the **Bulk Edit** dialog, configure the following:
+## Task 7: Apply a summer Q3 uplift across key markets
 
-   - **Measure**: select **2026 Sales Plan**.
-   - **Select Filter**: select **+ Add Filter** for each filter and set the following:
-     - **Region Name** > **Is** > **EU**, **LA**
-     - **Category** > **Is** > **Beer**, **Hard Seltzer**
-     - **Quarter Name** > **Is** > **Q3**
-   - **Apply to Row Level**: select **Brand**.
-   - **Apply to Column Level**: select **Month Short Name**.
-   - **Type**: select **Append By**.
-   - **Value**: enter the following:
+In this task, you use **Bulk Edit** to apply an 8% uplift to the **2026
+Sales Plan** for Beer and Hard Seltzer in the EU and Latin America
+during Q3. This applies the summer promotion to the whole segment in one
+action, so you don't need to edit each cell.
 
-     ```text
-     8%
-     ```
+1.  On the ribbon, select **Planning** \> **Bulk Edit**.
 
-   - **Distribution**: keep **Distribute by weights of 2026 Sales Plan**.
+    ![Screenshot](media/image95.png)
 
-   ![Screenshot 96](./media/image96.png)
+    The **Bulk Edit** dialog opens.
 
-3. Select **Apply**.
+2.  In the **Measure** list, select **2026 Sales Plan**.
 
-   ![Screenshot 97](./media/image97.png)
+3.  Under **Select Filter**, add the following filters by selecting **+
+    Add Filter** for each one:
 
-   The **Values saved** notification appears, and the updated cells are highlighted. The **2026 Sales Plan** Grand Total for **All** changes to **18,362.79**. The Grand Total for **EU** changes to **4,539.45**, and the Grand Total for **LA** changes to **2,099.09**.
+    - Region Name - **Is** - **EU**, **LA**
 
-4. Review the **Q3** **2026 Sales Plan** values for **EU** and **LA**.
+    - Category - **Is** - **Beer**, **Hard Seltzer**
 
-   ![Screenshot 98](./media/image98.png)
+    - Quarter Name - **Is** - **Q3**
 
-   The **Q3** value for **EU** changes to **1,195.33**, and the **Q3** value for **LA** changes to **551.20**. The **Q3** total for **All** changes to **4,747.00**. The values for **APAC** and **NA** don't change.
+4.  Enter the following details for the remaining fields:
 
-5. Verify that the **Q3** **2026 Sales Plan** values for **Beer** and **Hard Seltzer** in **EU** and **LA** increased by 8%, and that the rest of the plan is unchanged.
+    - Apply to Row Level - **Brand**
 
-   ![Screenshot 99](./media/image99.png)
+    - Apply to Column Level - **Month Short Name**
 
-   The highlighted cells show the updated values: **18,362.79** for the **All** Grand Total, **4,539.45** for **EU**, **2,099.09** for **LA**, and **4,747.00** for the **All** **Q3** total. The **Q3** value for **EU** is **1,195.33**, and the **Q3** value for **LA** is **551.20**.
+    - Type - **Append By**
 
-### Task <N>: Add inline comments
+    - Value - +++8%+++
 
-In this task, you add an inline comment to the Summit Lager plan value to record why the number was changed. Inline comments keep the reasoning behind plan changes next to the data, so reviewers and approvers understand each adjustment.
+    - Distribution - **Distribute by weights of 2026 Sales Plan**
 
-1. In the grid, under **NA** > **Beer**, select the **Grand Total** cell of the **2026 Sales Plan** column for **Summit Lager** (**4,747.40**).
+    ![Screenshot](media/image96.png)
 
-2. On the top-right toolbar, select **Comments**.
+    **Note:** The **Distribution** field defaults to **Distribute by
+    weights of 2026 Sales Plan**.
 
-   ![Screenshot 100](./media/image100.png)
+5.  Select **Apply**.
 
-   A comment box opens next to the selected cell.
+    ![Screenshot](media/image97.png)
 
-3. In the comment text box, enter the following:
+    The **Values saved** notification appears, and the updated cells are
+    highlighted. The **2026 Sales Plan** totals change as follows:
 
-   ```text
-   8% uplift agreed with the NA sales lead. Annual total distributed across quarters with a 4% growth trend
-   ```
+    - **All** - **18,362.79**
 
-4. Select the **Send** (arrow) button.
+    - **EU** - **4,539.45**
 
-   ![Screenshot 101](./media/image101.png)
+    - **LA** - **2,099.09**
 
-   The **Comment added** notification appears, and the **Summit Lager** cell shows a green comment indicator in its corner.
+6.  Review the **Q3** values in the **2026 Sales Plan** column for
+    **EU** and **LA**.
 
-5. Select the comment indicator on the **Summit Lager** **2026 Sales Plan** cell.
+    ![Screenshot](media/image98.png)
 
-   ![Screenshot 102](./media/image102.png)
+    The **Q3** **2026 Sales Plan** value for **EU** is **1,195.33**, and
+    the value for **LA** is **551.20**. The **Q3** total for **All** is
+    **4,747.00**.
 
-   The comment opens and shows the author, the date and time, and the comment text. Use the **Reply** box to reply to the comment. Use the **Edit** (pencil) and **Delete** (trash) icons to change or remove it.
+7.  Verify that the **Q3** **2026 Sales Plan** values for **Beer** and
+    **Hard Seltzer** in **EU** and **LA** increased by 8%, and that the
+    rest of the plan is unchanged.
 
-6. In the comment card, select the **More options** (**...**) icon.
+    ![Screenshot](media/image99.png)
 
-   ![Screenshot 103](./media/image103.png)
+    The highlighted cells show the updated values:
 
-   A menu opens with the **Resolve Thread** and **Lock Thread** actions, and a **Sort by** section with **Newest to Oldest** and **Oldest to Newest** options. Use these options to close a discussion, prevent further replies, or change the order of replies in the thread.
+    - **All** **Grand Total** - **18,362.79**
 
-### Task <N+1>: Enable the Comments column
+    - **EU** **Grand Total** - **4,539.45**
 
-In this task, you turn on the **Comments** column so that comments appear in a dedicated column in the grid. This lets reviewers read the reasoning for each row next to the plan numbers, without opening each comment indicator.
+    - **LA** **Grand Total** - **2,099.09**
 
-1. On the **Planning** ribbon, select the **Comments** dropdown arrow.
+    - **All** **Q3** total - **4,747.00**
 
-2. Select **Settings**.
+    - **EU** **Q3** - **1,195.33**
 
-   ![Screenshot 104](./media/image104.png)
+    - **LA** **Q3** - **551.20**
 
-   The **Comment Settings** dialog opens.
+    The values for **APAC** and **NA** don't change.
 
-3. Under **Comments Column**, set the toggle to **Show**.
+## Task 8: Add inline comments
 
-   ![Screenshot 105](./media/image105.png)
+In this task, you add an inline comment to the Summit Lager plan value
+to record why the number changed. Inline comments keep the reasoning
+behind plan changes next to the data, so reviewers and approvers can
+understand each adjustment.
 
-4. Select **Save**.
+1.  In the grid, under **NA** \> **Beer**, select the **Grand Total**
+    cell in the **2026 Sales Plan** column for **Summit Lager**
+    (**4,747.40**).
 
-   ![Screenshot 106](./media/image106.png)
+2.  On the toolbar in the upper-right corner, select **Comments**.
 
-   A **Comments** column appears on the right side of the grid. This row-level column shows comments next to the plan numbers for each row.
+    ![Screenshot](media/image100.png)
 
-5. In the **Comments** column, double-click the cell for the **NA** row.
+    A comment box opens next to the selected cell.
 
-   A comment card opens with an **Assign to user** option and a text box.
+3.  In the comment text box, enter the following text:
 
-6. In the comment text box, enter the following:
+    +++8% uplift agreed with the NA sales lead. Annual total distributed
+    across quarters with a 4% growth trend+++
 
-   ```text
-   Sales Plan reviewed and ready for submission
-   ```
+4.  Select the **Send** (arrow) icon.
 
-7. In the same text box, type the following to tag another user:
+    ![Screenshot](media/image101.png)
 
-   ```text
-   @
-   ```
+    The **Comment added** notification appears. The **Summit Lager** cell
+    shows a green comment indicator in its corner.
 
-   A dropdown list of users appears.
+5.  Select the comment indicator on the **Summit Lager** **2026 Sales
+    Plan** cell.
 
-8. In the dropdown list, select the user to tag, for example **Accounting-User-<ID>**.
+    ![Screenshot](media/image102.png)
 
-   The tagged user's name appears as a link in the comment text.
+    The comment opens and shows your comment text, the date and time that
+    you added it, and a **Reply** box.
 
-9. Select the **Post** (send arrow) button in the lower-right corner of the comment card.
+    **Note:** The comment card shows the author, the date and time, and
+    the comment text. Use the **Reply** box to reply to the comment. Use
+    the **Edit** (pencil) and **Delete** (trash) icons to change or remove
+    the comment.
 
-   ![Screenshot 107](./media/image107.png)
+6.  In the comment card, select the **More options** (**...**) icon.
 
-   A **Comment added successfully** notification appears in the upper-right corner. The comment appears in the **Comments** column for the **NA** row, and the comment card shows your user name, the date and time, the comment text, and the tagged user.
+    ![Screenshot](media/image103.png)
 
-   ![Screenshot 108](./media/image108.png)
+    A menu opens with the **Resolve Thread** and **Lock Thread** actions.
+    The menu also has a **Sort by** section with the **Newest to Oldest**
+    and **Oldest to Newest** options. Use these options to close a
+    discussion, prevent further replies, or change the order of replies in
+    the thread.
 
-### Task <N+2>: Add collaboration columns
+## Task 9: Enable the comments column
 
-In this task, you collapse the column hierarchy and start adding a list column to the grid. Collaboration columns let reviewers record structured inputs, such as a status, next to the plan numbers for each row.
+In this task, you turn on the **Comments** column so that comments
+appear in a dedicated column in the grid. Reviewers can then read the
+reasoning for each row next to the plan numbers without opening each
+comment indicator.
 
-1. In the column header area, select the collapse arrow (**˅**) next to **2025** in the **Year** row.
+1.  On the toolbar in the upper-right corner, select the arrow next to
+    **Comments**.
 
-   ![Screenshot 109](./media/image109.png)
+2.  Select **Settings**.
 
-   The quarter columns collapse, and the grid shows the year-level totals.
+    ![Screenshot](media/image104.png)
 
-2. On the **Planning** ribbon, select **List** > **Single Select**.
+    The **Comment Settings** dialog opens.
 
-   ![Screenshot 110](./media/image110.png)
+3.  Under **Comments Column**, set the toggle to **Show**.
 
-3. In the **Data Input** pane, in the **Title** field, enter the following:
+    ![Screenshot](media/image105.png)
 
-   ```text
-   Status
-   ```
+    **Note:** Leave the other settings at their current values. For
+    example, leave **Enable Commenting** set to **On** and **Teams
+    Notification** set to **On**.
 
-   **Insert as** remains set to **Visual Column**, and **Input type** remains set to **Single Select**.
+4.  Select **Save**.
 
-4. Under **Options**, select **Presets**.
+    ![Screenshot](media/image106.png)
 
-   ![Screenshot 111](./media/image111.png)
+    The **Comment Settings** dialog closes. A **Comments** column appears
+    on the right side of the grid.
 
-   The **Add options from Preset** dialog opens with a list of preset option sets, such as **Yes/No**, **Up/Down**, **Open/Closed**, **Project Status**, **Approval Status**, and **Process Status**.
+5.  In the **Comments** column, double-click the cell for the **NA**
+    row.
 
-5. In the **Add options from Preset** dialog, select **Process Status**.
+    A comment card opens with an **Assign to user** option and a comment
+    text box.
 
-6. Select **Apply**.
+6.  In the comment text box, enter the following text:
 
-   ![Screenshot 112](./media/image112.png)
+    +++Sales Plan reviewed and ready for submission+++
 
-   The dialog closes. The **Options** section of the **Data Input** pane lists the preset values **Not Started**, **Started**, **In Progress**, **In Review**, and **Completed**, each with its own color.
+7.  In the same text box, enter the following character to tag another
+    user:
 
-7. Keep the default settings for the options and select **Create**.
+    +++@+++
 
-   ![Screenshot 113](./media/image113.png)
+    A list of users appears.
 
-   A **Measure created successfully** notification appears in the upper-right corner. The new **Status** column appears in the grid next to the **Comments** column.
+8.  In the list, select the user to tag, for example
+    **Accounting-User-\<ID\>**.
 
-   ![Screenshot 114](./media/image114.png)
+    The tagged user's name appears as a link in the comment text.
 
-8. In the grid, in the **NA** row, select the **Status** cell.
+9.  In the lower-right corner of the comment card, select **Post** (send
+    arrow).
 
-   ![Screenshot 115](./media/image115.png)
+    ![Screenshot](media/image107.png)
 
-   A drop-down list opens with a **Search for an option** box and the options **Not Started**, **Started**, **In Progress**, **In Review**, and **Completed**.
+    A **Comment added successfully** notification appears in the
+    upper-right corner. The comment appears in the **Comments** column for
+    the **NA** row. The comment card shows your user name, the date and
+    time, the comment text, and the tagged user.
 
-9. In the drop-down list, select **In Progress**.
+    ![Screenshot](media/image108.png)
 
-   ![Screenshot 116](./media/image116.png)
+## Task 10: Add a status column
 
-   The **Status** cell in the **NA** row shows **In Progress** with a yellow highlight.
+In this task, you collapse the column hierarchy and add a **Status**
+list column to the grid. Collaboration columns let reviewers record
+structured inputs, such as a status, next to the plan numbers for each
+row.
 
-10. In the upper-right corner, select **Save**.
+1.  In the column header area, select the collapse arrow (**˅**) next to
+    **2025** in the **Year** row.
 
-    ![Screenshot 117](./media/image117.png)
+    ![Screenshot](media/image109.png)
 
-    A **Report saved successfully!** notification appears in the upper-right corner.
+    The quarter columns collapse, and the grid shows the year-level
+    totals.
 
-    ![Screenshot 118](./media/image118.png)
+2.  On the **Planning** tab, in the **Rows & Columns** group, select
+    **List** \> **Single Select**.
 
-## Exercise 4: Optimizer
+    ![Screenshot](media/image110.png)
 
-In this exercise, you build a planning sheet that combines the 2026 Sales Plan with 2025 COGS as a cost baseline and use the Optimizer to find the mix of revenue growth and cost reduction that reaches a $12.5B gross profit target.
+3.  In the **Data Input** pane, in the **Title** field, enter the
+    following value:
 
-### Task 1: Set up the Gross Profit sheet
+    +++Status+++
 
-In this task, you create a new planning sheet named Gross Profit and assign its rows, columns, and values. This sheet brings revenue and cost data together so the Optimizer can calculate gross profit by region, category, and brand.
+    **Insert as** remains set to **Visual Column**, and **Input type**
+    remains set to **Single Select**.
 
-1. On the **Home** tab, in the **Create** group, select **New Planning Sheet**.
+4.  Under **Options**, select **Presets**.
 
-   ![Screenshot 119](./media/image119.png)
+    ![Screenshot](media/image111.png)
 
-   The **New Planning Sheet** dialog opens.
+    The **Add options from Preset** dialog opens. It lists preset option
+    sets, such as **Yes/No**, **Up/Down**, **Open/Closed**, **Project
+    Status**, **Approval Status**, and **Process Status**.
 
-2. In the **Name** field, enter the following:
+5.  In the **Add options from Preset** dialog, select **Process
+    Status**.
 
-   ```text
-   Gross Profit
-   ```
+6.  Select **Apply**.
 
-   ![Screenshot 120](./media/image120.png)
+    ![Screenshot](media/image112.png)
 
-3. Select **Create**.
+    The dialog closes. Under **Options**, the **Data Input** pane lists
+    the preset values **Not Started**, **Started**, **In Progress**, **In
+    Review**, and **Completed**. Each value has its own color.
 
-   The new **Gross Profit** sheet opens with the **Fields** and **Data** panes on the right.
+7.  Select **Create**.
 
-4. In the **Data** pane, under **Semantic Model** > **Dim Regions**, select the **Region Name** check box.
+    ![Screenshot](media/image113.png)
 
-   **Region Name** appears in the **Rows** well of the **Fields** pane.
+    A **Measure created successfully** notification appears in the
+    upper-right corner. The new **Status** column appears in the grid, to
+    the left of the **Comments** column.
 
-5. Under **Semantic Model** > **Dim skus**, select the **Category** check box.
+    ![Screenshot](media/image114.png)
 
-6. Under **Semantic Model** > **Dim skus**, select the **Brand** check box.
+8.  In the grid, in the **NA** row, select the **Status** cell.
 
-   ![Screenshot 121](./media/image121.png)
+    ![Screenshot](media/image115.png)
 
-   **Category** and **Brand** appear in the **Rows** well under **Region Name**.
+    A list opens. It contains a **Search for an option** box and the
+    options **Not Started**, **Started**, **In Progress**, **In Review**,
+    and **Completed**.
 
-   > **Note:** The rows must be in the order **Region Name**, **Category**, **Brand**. If **Brand** appears above **Category** in the **Rows** well, drag **Category** above **Brand**.
+9.  In the list, select **In Progress**.
 
-7. Under **Semantic Model** > **Dim Date**, select the **Date Hierarchy** check box.
+    ![Screenshot](media/image116.png)
 
-   **Date Hierarchy** appears in the **Columns** well with the levels **Year**, **Quarter Name**, and **Month Short Name**.
+    The **Status** cell in the **NA** row shows **In Progress** with a
+    yellow highlight.
 
-8. In the **Data** pane, select **From Sheets** > **Plan Intro**, and then select the **2026 Sales Plan** check box.
+10. In the upper-right corner of the ribbon, select **Save**.
 
-   **Sum of 2026 Sales Plan** appears in the **Values** well.
+    ![Screenshot](media/image117.png)
 
-9. Under **Semantic Model**, in the measure table, select the **2025 COGS** check box.
+    A **Report saved successfully!** notification appears in the
+    upper-right corner.
 
-   ![Screenshot 122](./media/image122.png)
+    ![Screenshot](media/image118.png)
 
-   The **Values** well shows **Sum of 2026 Sales Plan** and **2025 COGS**.
+# Exercise 4: Optimizer
 
-10. In the **Values** well, double-click the **Sum of 2026 Sales Plan** label.
+In this exercise, you combine the 2026 Sales Plan with 2025 COGS in a
+planning sheet and use the Optimizer to reach a \$12.5B gross profit
+target.
+
+## Task 1: Set up the Gross Profit sheet
+
+In this task, you create a planning sheet named Gross Profit and assign
+its rows, columns, and values. This sheet brings revenue and cost data
+together so that the Optimizer can calculate gross profit by region,
+category, and brand.
+
+1.  On the **Home** tab, in the **Create** group, select **New Planning
+    Sheet**.
+
+    ![Screenshot](media/image119.png)
+
+    The **New Planning Sheet** dialog opens.
+
+2.  In the **Name** field, enter the following value:
+
+    +++Gross Profit+++
+
+    ![Screenshot](media/image120.png)
+
+3.  Select **Create**.
+
+    The new **Gross Profit** sheet opens with the **Fields** and **Data**
+    panes on the right.
+
+4.  In the **Data** pane, under **Semantic Model** \> **Dim Regions**,
+    select the **Region Name** check box.
+
+    **Region Name** appears in the **Rows** well of the **Fields** pane.
+
+5.  Under **Semantic Model** \> **Dim skus**, select the **Category**
+    check box.
+
+6.  Under **Semantic Model** \> **Dim skus**, select the **Brand** check
+    box.
+
+    ![Screenshot](media/image121.png)
+
+    **Category** and **Brand** appear in the **Rows** well under **Region
+    Name**.
+
+    **Note:** The rows must be in the order **Region Name**, **Category**,
+    **Brand**. If **Brand** appears above **Category** in the **Rows**
+    well, drag **Category** above **Brand**.
+
+7.  Under **Semantic Model** \> **Dim Date**, select the **Date
+    Hierarchy** check box.
+
+    **Date Hierarchy** appears in the **Columns** well with the levels
+    **Year**, **Quarter Name**, and **Month Short Name**.
+
+8.  In the **Data** pane, under **From Sheets** \> **Plan Intro**,
+    select the **2026 Sales Plan** check box.
+
+    **Sum of 2026 Sales Plan** appears in the **Values** well.
+
+9.  Under **Semantic Model** \> **Measure Table** \> **Cost &
+    Discounts**, select the **2025 COGS** check box.
+
+    ![Screenshot](media/image122.png)
+
+    **2025 COGS** appears in the **Values** well under **Sum of 2026 Sales
+    Plan**.
+
+10. In the **Values** well, double-click the **Sum of 2026 Sales Plan**
+    label.
 
     The label becomes editable.
 
-11. Enter the following and press **Enter**:
+11. Enter the following name:
 
-    ```text
-    2026 Sales Plan
-    ```
+    +++2026 Sales Plan+++
 
-    The measure label in the **Values** well changes to **2026 Sales Plan**.
+    The label in the **Values** well changes to **2026 Sales Plan**.
 
-12. In the **Data** pane, verify that the following check boxes are selected: **Semantic Model** > **Measure Table** > **Cost & Discounts** > **2025 COGS** and **From Sheets** > **Plan Intro** > **2026 Sales Plan**.
+12. In the **Data** pane, verify that the following check boxes are
+    selected:
 
-   ![Screenshot 123](./media/image123.png)
+    - **Semantic Model** \> **Measure Table** \> **Cost & Discounts** \>
+      **2025 COGS**
+
+    - **From Sheets** \> **Plan Intro** \> **2026 Sales Plan**
+
+    ![Screenshot](media/image123.png)
 
     Both fields appear in the **Values** well.
 
-13. In the **Values** well, drag **2025 COGS** above the **2026 Sales Plan** field.
+13. In the **Values** well, drag **2025 COGS** above the **2026 Sales
+    Plan** field.
 
-   ![Screenshot 124](./media/image124.png)
+    ![Screenshot](media/image124.png)
 
     **2025 COGS** moves to the first position in the **Values** well.
 
-14. Verify that the **Values** well shows **2025 COGS** first and **2026 Sales Plan** second.
+14. Verify that the **Values** well shows **2025 COGS** first and **2026
+    Sales Plan** second.
 
-   ![Screenshot 125](./media/image125.png)
+    ![Screenshot](media/image125.png)
 
-    > **Note:** If the label still reads **Sum of 2026 Sales Plan**, repeat steps 10 and 11 to rename it to **2026 Sales Plan**.
+    **Note:** If the label still reads **Sum of 2026 Sales Plan**, repeat
+    steps 10 and 11 to rename it to **2026 Sales Plan**.
 
-### Task 2: Create data input columns for the Optimizer
+## Task 2: Create data input columns for the Optimizer
 
-In this task, you create editable data input columns by copying the existing **2026 Sales Plan** and **2025 COGS** series. The Optimizer adjusts these input columns to calculate the revenue growth and cost reduction needed to reach the gross profit goal.
+In this task, you create editable data input columns by copying the
+existing **2026 Sales Plan** and **2025 COGS** series. The Optimizer
+adjusts these input columns to calculate the revenue growth and cost
+reduction needed to reach the gross profit goal.
 
-1. On the **Planning** ribbon, select **Number** > **Copy from another series** > **2026 Sales Plan**.
+1.  On the **Planning** tab, select **Number** \> **Copy from another
+    series** \> **2026 Sales Plan**.
 
-   ![Screenshot 126](./media/image126.png)
+    ![Screenshot](media/image126.png)
 
-   The **Save changes to proceed** dialog box opens.
+    The **Save changes to proceed** dialog box opens.
 
-2. In the **Save changes to proceed** dialog box, select **Save and continue**.
+2.  In the **Save changes to proceed** dialog, select **Save and
+    continue**.
 
-   ![Screenshot 127](./media/image127.png)
+    ![Screenshot](media/image127.png)
 
-   The changes are saved and the **Data Input** pane opens.
+    The changes are saved, and the **Data Input** pane opens.
 
-3. In the **Data Input** pane, in the **Title** field, enter the following:
+3.  In the **Data Input** pane, in the **Title** field, enter the
+    following value:
 
-   ```text
-   Sales Plan
-   ```
+    +++Sales Plan+++
 
-   ![Screenshot 128](./media/image128.png)
+    ![Screenshot](media/image128.png)
 
-4. Verify that **Insert as** is set to **Visual Measure**, **Input type** is set to **Number**, **Column aggregation type** and **Row aggregation type** are set to **Sum**, and **Distribute parent value to children** is selected.
+4.  Verify that the **Data Input** pane shows the following settings:
 
-5. Select **Create**.
+    - Insert as - **Visual Measure**
 
-   The **Sales Plan** column is added to the table and shows the same values as **Sum of 2026 Sales Plan**, for example **18,362.79** for **All**.
+    - Input type - **Number**
 
-6. On the **Planning** ribbon, select **Number** > **Copy from another series** > **2025 COGS**.
+    - Column aggregation type - **Sum**
 
-   ![Screenshot 129](./media/image129.png)
+    - Row aggregation type - **Sum**
 
-7. In the **Data Input** pane, in the **Title** field, enter the following:
+    - Distribute parent value to children - **Selected**
 
-   ```text
-   COGS
-   ```
+5.  Select **Create**.
 
-   ![Screenshot 130](./media/image130.png)
+    The **Sales Plan** column is added to the table. It shows the same
+    values as **2026 Sales Plan**, for example **18,362.79** for **All**.
 
-8. Verify that **Insert as** is set to **Visual Measure**, **Input type** is set to **Number**, and **Column aggregation type** and **Row aggregation type** are set to **Sum**.
+6.  On the **Planning** tab, select **Number** \> **Copy from another
+    series** \> **2025 COGS**.
 
-9. Select **Create**.
+    ![Screenshot](media/image129.png)
 
-   ![Screenshot 131](./media/image131.png)
+7.  In the **Data Input** pane, in the **Title** field, enter the
+    following value:
 
-   The **COGS** column is added to the table and shows the same values as **2025 COGS**, for example **7,543.23** for **All**.
+    +++COGS+++
 
-   > **Note:** The **Sales Plan** and **COGS** columns are editable copies, and the Optimizer updates only these copies. The original **2026 Sales Plan** series from **From Sheets** and the **2025 COGS** semantic model measure stay unchanged. You hide the originals now to keep the grid clean, and you show them again after the Optimizer runs so that you can compare the results.
+    ![Screenshot](media/image130.png)
+
+8.  Verify that the **Data Input** pane shows the following settings:
+
+    - Insert as - **Visual Measure**
+
+    - Input type - **Number**
+
+    - Column aggregation type - **Sum**
+
+    - Row aggregation type - **Sum**
+
+    - Distribute parent value to children - **Selected**
+
+9.  Select **Create**.
+
+    ![Screenshot](media/image131.png)
+
+    The **COGS** column is added to the table. It shows the same values as
+    **2025 COGS**, for example **7,543.23** for **All**.
+
+    **Note:** The **Sales Plan** and **COGS** columns are editable copies,
+    and the Optimizer updates only these copies. The original **2026 Sales
+    Plan** series from **From Sheets** and the **2025 COGS** semantic
+    model measure stay unchanged. You hide the originals now to keep the
+    grid clean. After the Optimizer runs, you show them again to compare
+    the results.
 
 10. On the **Planning** ribbon, select **Show Columns**.
 
-    The **Show Columns** list opens.
+    The **Show Columns** pane opens.
 
-11. In the **Show Columns** list, clear the **2025 COGS** and **2026 Sales Plan** check boxes.
+11. In the **Show Columns** pane, clear the **2025 COGS** and **2026
+    Sales Plan** check boxes.
 
-    ![Screenshot 132](./media/image132.png)
+    ![Screenshot](media/image132.png)
 
     The grid shows only the **Sales Plan** and **COGS** columns.
 
-### Task 3: Calculate Gross Profit
+## Task 3: Calculate gross profit
 
-In this task, you add a formula column that calculates gross profit from the editable **Sales Plan** and **COGS** columns. The Optimizer uses this gross profit value to check progress toward the $12.5B goal.
+In this task, you add a formula column that calculates gross profit from
+the editable **Sales Plan** and **COGS** columns. The Optimizer uses
+this gross profit value to check progress toward the \$12.5B goal.
 
-1. On the **Planning** ribbon, select **Formula**.
+1.  On the **Planning** ribbon, in the **Rows & Columns** group, select
+    **Formula**.
 
-   ![Screenshot 133](./media/image133.png)
+    ![Screenshot](media/image133.png)
 
-2. In the **Formula Measure** pane, configure the following settings:
+    The **Formula Measure** pane opens.
 
-   - **Title**: enter the following:
+2.  In the **Formula Measure** pane, enter the following details:
 
-     ```text
-     Gross Profit
-     ```
+    - Title - +++Gross Profit+++
 
-   - **Insert as**: keep **Visual Measure** selected.
-   - **Data type**: keep **Number** selected.
-   - **Formula**: enter the following:
+    - Insert as - **Visual Measure**
 
-     ```text
-     [Sales Plan]-[COGS]
-     ```
+    - Data type - **Number**
 
-   - **Column aggregation type**: select **Formula**.
-   - **Row aggregation type**: select **Formula**.
+    - Formula - +++\[Sales Plan\]-\[COGS\]+++
 
-   ![Screenshot 134](./media/image134.png)
+    - Column aggregation type - **Formula**
 
-   > **Note:** When you enter the formula, select the editable **Sales Plan** and **COGS** input columns that you created in the previous task. Do not select the original **2026 Sales Plan** or **2025 COGS** columns.
+    - Row aggregation type - **Formula**
 
-3. Select **Create**.
+    ![Screenshot](media/image134.png)
 
-   The **Gross Profit** column is added to the grid and is calculated from the **Sales Plan** and **COGS** columns. For example, the **All** row shows **10,819.56**.
+    **Note:** Make sure the formula references the editable **Sales Plan**
+    and **COGS** input columns that you created in the previous task.
+    Don't select the original **2026 Sales Plan** or **2025 COGS**
+    columns.
 
-4. Collapse the row hierarchy to the **Category** level.
+3.  Select **Create**.
 
-   ![Screenshot 135](./media/image135.png)
+    The **Gross Profit** column is added to the grid. It's calculated from
+    the **Sales Plan** and **COGS** columns. For example, the **All** row
+    shows **10,819.56**. When you select a **Gross Profit** cell, the
+    formula bar shows **= \[Sales Plan\]-\[COGS\]**.
 
-   The grid shows **Region Name**, **Brand** and **Category** rows with the **Sales Plan**, **COGS** and **Gross Profit** columns.
+4.  Review the grid. Each region, brand, and category row shows the
+    **Sales Plan**, **COGS**, and **Gross Profit** columns, and the
+    **All** row shows **18,362.79**, **7,543.23**, and **10,819.56**.
 
-### Task 4: Run the Optimizer
+    ![Screenshot](media/image135.png)
 
-In this task, you start the Optimizer and set the CFO's $12.5B gross profit goal as the target. You tell the Optimizer to adjust the **Sales Plan** and **COGS** columns to reach that goal.
+## Task 4: Run the Optimizer
 
-1. In the **Gross Profit** column, select the grand total cell in the **All** row.
+In this task, you start the Optimizer and set the CFO's \$12.5B gross
+profit goal as the target. The Optimizer adjusts the **Sales Plan** and
+**COGS** columns to find a combination that reaches this goal.
 
-   The **Optimize** option on the **Planning** ribbon becomes active.
+1.  In the **Gross Profit** column, select the grand total cell in the
+    **All** row.
 
-2. On the **Planning** ribbon, select **Tools** > **Optimize**.
+    The **Optimize** option on the **Planning** ribbon becomes active.
 
-   ![Screenshot 136](./media/image136.png)
+2.  On the **Planning** ribbon, in the **Tools** group, select
+    **Optimize**.
 
-   The **Objective & Variables** dialog opens and shows **GrandTotal** and **2025 > Gross Profit** as the cell to optimize.
+    ![Screenshot](media/image136.png)
 
-3. In the **Objective & Variables** dialog, configure the following settings:
+    The **Objective & Variables** dialog opens. It shows **GrandTotal**
+    and **2025 \> Gross Profit** as the cell to optimize.
 
-   - **Objective**: select **Target**.
-   - **Target Value**: enter the following:
+3.  In the **Objective & Variables** dialog, enter the following
+    details:
 
-     ```text
-     12.5b
-     ```
+    - Objective - **Target**
 
-   - **Variables to Update**: select **Sales Plan** and **COGS**.
+    - Target Value - +++12.5b+++
 
-   ![Screenshot 137](./media/image137.png)
+    - Variables to Update - **Sales Plan**, **COGS**
 
-4. Select **Next**.
+    ![Screenshot](media/image137.png)
 
-   The Optimizer moves to the next page of the dialog.
+4.  Select **Next**.
 
-5. On the **Add Constraints** page, leave the list empty and select **Run**. This run uses no constraints.
+    The **Add Constraints** page opens and shows **No Constraints Added**.
 
-   ![Screenshot 138](./media/image138.png)
+5.  On the **Add Constraints** page, select **Run**.
 
-   The Optimizer runs and the **Output** page opens.
+    ![Screenshot](media/image138.png)
 
-6. Under **Results**, confirm that **Target Value** shows **12.50b** and **Achieved** shows **12.50b** with a green check mark.
+    The Optimizer runs without constraints, and the **Output** page opens.
 
-7. Under **Variables**, review the Optimizer's solution for **Sales Plan** and **COGS**. For example, **Sales Plan** shows **19.87b** and **COGS** shows **7371.50m**.
+6.  Under **Results**, confirm that **Target Value** shows **12.50b**
+    and **Achieved** shows **12.50b** with a green check mark.
 
-   > **Note:** The Optimizer can return different **Sales Plan** and **COGS** values on each run. Your values can differ from the examples in this lab. **Achieved** must still match the **Target Value** of **12.50b**.
+7.  Under **Variables**, review the Optimizer's solution for **Sales
+    Plan** and **COGS**.
 
-8. Select **Apply**.
+    For example, **Sales Plan** shows **19.20b** and **COGS** shows
+    **6.70b**. (The screenshot is from a different run and shows
+    **19.87b** and **7,371.50m**.)
 
-   ![Screenshot 139](./media/image139.png)
+    **Note:** The Optimizer can return different **Sales Plan** and
+    **COGS** values on each run. Your values can differ from the examples
+    in this lab. **Achieved** must still match the **Target Value** of
+    **12.50b**.
 
-   The Optimizer writes the optimized **Sales Plan** and **COGS** values to the sheet, and the **Gross Profit** grand total in the **All** row shows **12,500.00**.
+8.  Select **Apply**.
 
-9. In the grid, expand the **APAC** row and its brands to review how the Optimizer distributed the changes across the **Region Name**, **Brand** and **Category** hierarchy.
+    ![Screenshot](media/image139.png)
 
-   ![Screenshot 140](./media/image140.png)
+    The Optimizer writes the optimized **Sales Plan** and **COGS** values
+    to the sheet. The **Gross Profit** grand total in the **All** row
+    shows **12,500.00**.
 
-   Each brand and category shows updated **Sales Plan**, **COGS** and **Gross Profit** values. For example, **AquaSplash** > **Hard Seltzer** shows **35.97**, **11.64** and **24.34**.
+9.  In the grid, select the expand icon (**⊞**) next to **APAC**.
+
+    ![Screenshot](media/image140.png)
+
+    Each brand and category shows updated **Sales Plan**, **COGS**, and
+    **Gross Profit** values. For example, **Hard Seltzer** \>
+    **AquaSplash** shows **35.97**, **11.64**, and **24.34**.
 
 10. On the **Planning** ribbon, select **Show Columns**.
 
     The **Show Columns** pane opens and lists the fields in the sheet.
 
-11. In the **Show Columns** pane, select the check boxes for **2025 COGS** and **2026 Sales Plan**.
+11. In the **Show Columns** pane, select the **2025 COGS** and **2026
+    Sales Plan** check boxes.
 
-    ![Screenshot 141](./media/image141.png)
+    ![Screenshot](media/image141.png)
 
-    The **2025 COGS** and **2026 Sales Plan** columns appear next to the optimized **Sales Plan** and **COGS** columns.
+    The **2025 COGS** and **2026 Sales Plan** columns appear next to the
+    optimized **Sales Plan** and **COGS** columns.
 
-12. In the **All** row, compare **Sales Plan** with the original **2026 Sales Plan**. For example, **Sales Plan** shows **19,203.01** and **2026 Sales Plan** shows **18,362.79**, an increase of about **840** million.
+12. In the **All** row, compare the **Sales Plan** value with the
+    original **2026 Sales Plan** value.
 
-13. In the **All** row, compare **COGS** with the original **2025 COGS**. For example, **COGS** shows **6,703.01** and **2025 COGS** shows **7,543.23**, a reduction of about **840** million.
+    For example, **Sales Plan** shows **19,203.01** and **2026 Sales
+    Plan** shows **18,362.79**. This is an increase of about 840 million.
 
-    The revenue increase and the cost reduction together deliver the **12,500.00** million ($12.5B) **Gross Profit** target.
+13. In the **All** row, compare the **COGS** value with the original
+    **2025 COGS** value.
 
-## Exercise 5: Approval workflow
+    For example, **COGS** shows **6,703.01** and **2025 COGS** shows
+    **7,543.23**. This is a reduction of about 840 million.
 
-In this exercise, you configure a two-level approval workflow on the **Plan Intro** sheet, with **Regional Manager** and **Finance Director** levels, and then verify it by making a change and submitting it for review.
+    The revenue increase and the cost reduction together deliver the
+    **Gross Profit** target of **12,500.00** million (\$12.5B).
 
-> **Note:** This exercise is optional.
+# Exercise 5: Approval workflow
 
-### Task 1: Enable the approval workflow
+In this exercise, you set up a two-level approval workflow (**Regional
+Manager** and **Finance Director**) on the **Plan Intro** sheet and
+verify it with a submitted change.
 
-In this task, you set up two approval levels so that plan changes go to the Regional Manager first and then to the Finance Director. This makes sure every change to the 2026 plan is reviewed before the plan is finalized.
+**Note:** This exercise is optional. Approvers must be users in your
+organization. In a single-user lab, you can select your own account for
+both levels.
 
-1. In the **Explorer** pane, select the **Plan Intro** sheet.
+## Task 1: Enable the approval workflow
 
-2. On the ribbon, select **Model** > **Approval**.
+In this task, you set up two approval levels so that plan changes go to
+the regional manager first and then to the finance director. This
+ensures that someone reviews every change to the 2026 plan before the
+plan is final.
 
-   ![Screenshot 142](./media/image142.png)
+1.  In the **Explorer** pane, select the **Plan Intro** sheet.
 
-   The **Approval Workflow** pane opens on the **Who needs to approve your data?** page. It shows two level cards named **Level** and **Level (2)**.
+2.  On the ribbon, select the **Model** tab.
 
-3. In the first level card, select the edit (pencil) icon next to **Level**.
+3.  On the **Model** tab, in the **Workflows** group, select
+    **Approval**.
 
-   ![Screenshot 143](./media/image143.png)
+    ![Screenshot](media/image142.png)
 
-4. In the level name field, enter the following:
+    The **Approval Workflow** pane opens on the **Who needs to approve
+    your data?** page. It shows two level cards named **Level** and
+    **Level (2)**.
 
-   ```text
-   Regional Manager
-   ```
+4.  In the first level card, select the edit (pencil) icon next to
+    **Level**.
 
-5. Under **Select Approvers By**, confirm that **Email Address** is selected.
+    ![Screenshot](media/image143.png)
 
-6. Select the **Select users...** field and enter the regional manager's name or email address:
+5.  In the level name field, enter the following name:
 
-   ```text
-   <REGIONAL_MANAGER_NAME_OR_EMAIL>
-   ```
+    +++Regional Manager+++
 
-7. Select the regional manager's account from the list.
+6.  Under **Select Approvers By**, confirm that **Email Address** is
+    selected.
 
-   The user appears in the **Select users...** field of the **Regional Manager** level.
+7.  Select the **Select users...** field.
 
-8. In the second level card, select the edit (pencil) icon next to **Level (2)**.
+8.  Enter the name or email address of the user who acts as the regional
+    manager, for example the second lab user provided in your lab
+    environment.
 
-9. In the level name field, enter the following:
+9.  Select the regional manager's account from the list.
 
-   ```text
-   Finance Director
-   ```
+    The user appears in the **Select users...** field of the **Regional
+    Manager** level.
 
-10. Under **Select Approvers By**, confirm that **Email Address** is selected.
+10. In the second level card, select the edit (pencil) icon next to
+    **Level (2)**.
 
-11. Select the **Select users...** field and enter the finance director's name or email address:
+11. In the level name field, enter the following name:
 
-    ```text
-    <FINANCE_DIRECTOR_NAME_OR_EMAIL>
-    ```
+    +++Finance Director+++
 
-12. Select the finance director's account from the list.
+12. Under **Select Approvers By**, confirm that **Email Address** is
+    selected.
 
-    The user appears in the **Select users...** field of the **Finance Director** level.
+13. Select the **Select users...** field.
 
-13. Leave **Allow entry on Totals/Subtotals** selected for both levels.
+14. Enter the name or email address of the user who acts as the finance
+    director, for example your own lab user account.
 
-14. Select **Next**.
+15. Select the finance director's account from the list.
 
-    ![Screenshot 144](./media/image144.png)
+    The user appears in the **Select users...** field of the **Finance
+    Director** level.
+
+16. Confirm that the **Allow entry on Totals/Subtotals** check box is
+    selected for both levels.
+
+17. Select **Next**.
+
+    ![Screenshot](media/image144.png)
 
     The **How should the approval flow work?** page opens.
 
-15. Under **Reset on Rejection**, turn on the **Reset all previous levels to In Progress** toggle.
+18. Under **Reset on Rejection**, turn on the **Reset all previous
+    levels to In Progress** toggle.
 
-16. Under **Teams Notifications**, confirm that the **When submitted For review** and **When approved/rejected** toggles are turned on.
+    When an approver rejects a change, all previous approval levels return
+    to **In Progress** for editing.
 
-17. Select **Submit**.
+19. Under **Teams Notifications**, confirm that the **When submitted For
+    review** and **When approved/rejected** toggles are turned on.
 
-    ![Screenshot 145](./media/image145.png)
+20. Select **Submit**.
 
-    The approval workflow is saved for the **Plan Intro** sheet with the **Regional Manager** and **Finance Director** levels.
+    ![Screenshot](media/image145.png)
 
-18. Wait for the approval workflow to finish saving after you select **Submit**.
+    The approval workflow for the **Plan Intro** sheet starts saving with
+    the **Regional Manager** and **Finance Director** levels.
 
-   ![Screenshot 146](./media/image146.png)
+21. Wait for the approval workflow to finish saving.
 
-   The **How should the approval flow work?** page closes and the sheet opens again.
+    ![Screenshot](media/image146.png)
 
-19. In the sheet, scroll right to the end of the columns and locate the **Status** column.
+    The **How should the approval flow work?** page closes, and the **Plan
+    Intro** sheet opens again.
 
-   ![Screenshot 147](./media/image147.png)
+22. In the sheet, scroll right to the **Status** column at the end of
+    the columns.
 
-   The renamed approval columns are added to the sheet. The **Status** column shows **In Progress** for the **NA** row.
+    ![Screenshot](media/image147.png)
 
-### Task <TASK_NUMBER>: Verify the approval workflow
+    The **Status** column shows **In Progress** for the **NA** row. The
+    **Regional Manager** and **Finance Director** approval columns appear
+    next to the **Status** column.
 
-In this task, you change a value in the 2026 Sales Plan to confirm that the approval workflow tracks plan edits. This shows that changes to the plan go through the approval process before the plan is finalized.
+## Task 2: Verify the approval workflow
 
-1. In the sheet, under **Region Name**, select the expand (**+**) icon next to **APAC**.
+In this task, you change a value in the 2026 Sales Plan and submit the
+change for approval. This confirms that plan changes go through the
+approval workflow before the plan is finalized.
 
-   The **APAC** row expands and shows the **Beer**, **Hard Seltzer**, **Non-Alcoh...**, and **Ready to D...** categories.
+1.  In the sheet, under **Region Name**, select the expand icon (**⊞**)
+    next to **APAC**.
 
-2. Double-click the **Beer** cell under **Grand Total** > **2026 Sales Plan**.
+    The **APAC** row expands and shows its product categories, including
+    **Beer**, **Hard Seltzer**, and **Non-Alcoholic**.
 
-   The formula bar opens and shows the current value of the cell.
+2.  In the **APAC** \> **Beer** row, double-click the cell under **Grand
+    Total** \> **2026 Sales Plan**.
 
-3. In the formula bar, place the cursor after the existing value and enter the following:
+    The formula bar opens and shows the current value of the cell,
+    **1894286222.9**.
 
-   ```text
-   +10%
-   ```
+3.  In the formula bar, place the cursor after the existing value.
 
-   ![Screenshot 148](./media/image148.png)
+4.  Type **+10%** (a plus sign followed by 10%) to increase the plan by
+    10 percent.
 
-   A preview of the new value, **2,083,714,845.19**, appears below the formula bar.
+    ![Screenshot](media/image148.png)
 
-4. Press **Enter**.
+    A preview of the new value, **2,083,714,845.19**, appears below the
+    formula bar.
 
-   ![Screenshot 149](./media/image149.png)
+5.  Press **Enter**.
 
-   The **Beer** value in the **2026 Sales Plan** column changes to **2,083.71**. The **APAC** total changes to **2,341.46**, and the quarterly **2026 Sales Plan** values for **APAC** and **Beer** update.
+    ![Screenshot](media/image149.png)
 
-5. In the sheet, under **Regional Manager**, select the cell in the **Beer** row under **APAC**.
+    The **Beer** value in the **2026 Sales Plan** column changes to
+    **2,083.71**. The **APAC** total changes to **2,341.46**. The
+    quarterly **2026 Sales Plan** values for **APAC** and **Beer** also
+    update.
 
-   A dropdown list opens with the **Search for an option** box and the **In Progress**, **Submitted**, and **Reopened** options.
+6.  In the sheet, under **Regional Manager**, select the cell in the
+    **APAC** \> **Beer** row.
 
-6. In the dropdown list, select **Submitted**.
+    A list opens. It shows the **Search for an option** box and the **In
+    Progress**, **Submitted**, and **Reopened** options.
 
-   ![Screenshot 150](./media/image150.png)
+7.  In the list, select **Submitted**.
 
-   The **Regional Manager** cell for the **Beer** row shows **Submitted**.
+    ![Screenshot](media/image150.png)
 
-7. Verify that the **Finance Director** cell in the **Beer** row shows **Pending**.
+    The **Regional Manager** cell in the **Beer** row shows **Submitted**.
 
-   ![Screenshot 151](./media/image151.png)
+8.  Verify that the **Finance Director** cell in the **Beer** row shows
+    **Pending**.
 
-   The **Pending** status confirms that the submission is routed to the Finance Director for approval.
+    ![Screenshot](media/image151.png)
 
-   > **Note:** When the Regional Manager submits the change, a Microsoft Teams notification is sent to the Finance Director. The Finance Director can then approve or reject the change.
+    The **Pending** status confirms that the submission is routed to the
+    finance director for approval.
 
-8. Under **Finance Director**, select the **Pending** cell in the **Beer** row.
+    **Note:** When the regional manager submits the change, Microsoft
+    Teams sends a notification to the finance director. The finance
+    director can then approve or reject the change.
 
-   ![Screenshot 152](./media/image152.png)
+9.  In the sheet, under **Finance Director**, select the **Pending**
+    cell in the **APAC** \> **Beer** row.
 
-   A dropdown list opens with **Pending** as the current value and the **Approved** and **Rejected** options. The Finance Director selects one of these options to approve or reject the change.
+    ![Screenshot](media/image152.png)
+
+    A list opens. It shows **Pending** as the current value, the **Search
+    for an option** box, and the **Approved** and **Rejected** options.
+    The finance director selects one of these options to approve or reject
+    the change.
+
+10. Press **Esc** to close the list without changing the status.
+
+    The list closes, and the **Finance Director** cell in the **Beer** row
+    still shows **Pending**.
 
 **Outcomes**
 
-- Training environment set up: semantic model imported, SQL database created, Plan app built, and both connections configured.
-- **Plan Intro** sheet created with **Region Name** > **Category** > **Brand** rows, date hierarchy columns, and **Gross Revenue** values.
-- **2026 Target** set at $18.75B and distributed by prior-year weights with an H2 skew applied across **Q3** and **Q4**.
-- **2026 Sales Plan** created: Summit Lager NA adjusted by +8% with a 4% quarterly growth trend, and EU and LA Beer and Hard Seltzer Q3 uplift of +8% applied through **Bulk Edit**.
-- Inline comment added to Summit Lager NA, and **Comments** column enabled with a row-level comment assigned to another user.
-- **Gross Profit** sheet built with **2026 Sales Plan** and **2025 COGS** as inputs and **Gross Profit** as a formula measure.
-- Optimizer run with a $12.5B gross profit target: Sales Plan increased from $18,552M to $19,547M, and COGS reduced from $7,543M to $7,047M.
-- Original and optimized values compared side by side.
-- (Optional) Two-level approval workflow configured: **Regional Manager** and **Finance Director** levels added, and Summit Lager APAC submission routed to Finance Director for approval.
+This section recaps what you accomplished in this lab. Use it to confirm
+that you completed each exercise before you read the summary.
 
----
+- You set up the training environment. You imported the semantic model,
+  created the SQL database, built the Plan app, and configured both
+  connections.
 
-## Summary
+- You created the **Plan Intro** sheet. The sheet has **Region Name** \>
+  **Category** \> **Brand** rows, date hierarchy columns, and **2025
+  Gross Revenue** values.
 
-In this lab, you:
+- You set the **2026 Target** at \$18.75B. You distributed the target by
+  prior-year weights and applied an H2 skew across **Q3** and **Q4**.
 
-- Set up a training environment by importing the Acme Beverages semantic model, creating a Fabric SQL database, building a Plan app, and configuring semantic model and SQL connections
-- Created the Plan Intro sheet with Region Name, Category, and Brand rows, a date hierarchy in columns, and 2025 Gross Revenue values, then explored the Plan interface
-- Set a top-down 2026 Target of $18.75B, distributed by 2025 revenue weights, with an H2 skew applied to Q3 and Q4 by locking Q1 and Q2
-- Built a bottom-up 2026 Sales Plan with an 8% Summit Lager uplift in North America using a 4% quarterly growth trend, plus an 8% Q3 Bulk Edit uplift for Beer and Hard Seltzer in the EU and Latin America
-- Added inline comments, a Comments column with an @mention, and a Status column to support collaboration
-- Built a Gross Profit sheet and ran the Optimizer to hit a $12.5B target, increasing the Sales Plan from $18,552M to $19,547M and reducing COGS from $7,543M to $7,047M, and optionally configured a two-level approval workflow
+- You created the **2026 Sales Plan**:
+
+  - You adjusted Summit Lager NA by +8% with a 4% quarterly growth
+    trend.
+
+  - You used **Bulk Edit** to apply a +8% Q3 uplift to Beer and Hard
+    Seltzer in EU and LA.
+
+- You added an inline comment to Summit Lager NA. You also enabled the
+  **Comments** column and tagged another user in a row-level comment.
+
+- You built the **Gross Profit** sheet. The sheet uses editable **Sales
+  Plan** and **COGS** copies of **2026 Sales Plan** and **2025 COGS**,
+  with **Gross Profit** as a formula measure.
+
+- You ran the Optimizer with a \$12.5B gross profit target:
+
+  - The Sales Plan increased from \$18,363M to about \$19,203M.
+
+  - COGS decreased from \$7,543M to about \$6,703M.
+
+- You compared the original and optimized values side by side.
+
+- (Optional) You configured a two-level approval workflow. You added the
+  **Regional Manager** and **Finance Director** levels. You then routed
+  the APAC Beer submission to the finance director for approval.
+
+**Summary**
+
+In this lab, you imported the Acme Beverages semantic model and created
+a SQL database in Microsoft Fabric. You then built a Plan app and
+configured the semantic model and SQL connections. You created the Plan
+Intro sheet with Region Name, Category, and Brand rows, date hierarchy
+columns, and 2025 Gross Revenue values. You then explored the Plan
+interface. You set a top-down 2026 Target of \$18.75B and distributed it
+by 2025 revenue weights. You then locked Q1 and Q2 to apply an H2 skew
+to Q3 and Q4. You built a bottom-up 2026 Sales Plan with an 8% Summit
+Lager uplift in North America and a 4% quarterly growth trend. You then
+used Bulk Edit to add an 8% Q3 uplift for Beer and Hard Seltzer in the
+EU and Latin America. You added inline comments, a Comments column with
+an @mention, and a Status column to support collaboration. Finally, you
+built a Gross Profit sheet and ran the Optimizer to reach a \$12.5B
+gross profit target. The Optimizer increased the Sales Plan from
+\$18,363M to about \$19,203M and reduced COGS from \$7,543M to about
+\$6,703M. Optionally, you configured a two-level approval workflow.
