@@ -1,4 +1,4 @@
-# Lab 05- Multi-dimensional planning
+# Lab 05: Build multi-dimensional Profitability Planning
 
 ## Scenario
 
