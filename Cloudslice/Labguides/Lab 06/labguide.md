@@ -1,4 +1,4 @@
-# Lab 06- Getting started with PowerTable
+# Lab 06: Build an asset management data app with PowerTable
 
 ## Scenario
 
