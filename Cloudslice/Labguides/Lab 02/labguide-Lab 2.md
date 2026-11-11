@@ -1,56 +1,46 @@
 # Lab 02: Build a rolling forecast and write back results to a Fabric SQL database with Plan in Microsoft Fabric
 
-**Scenario**
+## Scenario
 
 Acme Beverages relies on 24 months of historical sales actuals to plan for the year ahead. Its finance team builds forecasts manually, which makes it hard to account for seasonal demand, keep the forecast current as new actuals arrive, and share a finalized forecast with downstream systems.
 
 To solve this, Acme Beverages adopts a rolling forecast process in its planning app, backed by a Fabric SQL database. The key components are:
-
 - **Forecast sheet**: Combines 2024 and 2025 actuals with the **Forecast** measure, which covers January to December 2026.
-
 - **Statistical Forecasting**: Uses Trend Decomposition with MSTL to detect annual and quarterly seasonality and generate a full year of forecasted values.
-
 - **Close Period and Reforecast**: Locks in actuals as they arrive, extends the forecast horizon, and reseeds newly opened periods.
-
 - **Writeback**: Commits the finalized forecast to the Acme_Beverages Fabric SQL database and logs each writeback.
+
 
 In this lab, you are a financial planning analyst at Acme Beverages. You build the 2026 rolling forecast, keep it current as January 2026 actuals arrive, and write the finalized forecast back to the database.
 
-**Introduction**
+## Introduction
 
 In this lab, you build a rolling forecast in the **Acme_Beverages_Plan** app. You start by creating the **Forecast** sheet and a blank **Forecast** measure. Then you populate the **Forecast** measure with Statistical Forecasting, using 24 months of historical actuals and the **Trend Decomposition with MSTL** algorithm. Next, you bring in January 2026 actuals, close the period, extend the forecast horizon to January 2027, and reforecast the newly opened period. Finally, you write the forecast back to the **Acme_Beverages** Fabric SQL database, verify the results in the **Forecast** table, and review the writeback logs.
 
-**Objectives**
+### Objectives
 
 After completing this lab, you will be able to:
-
 - Create the **Forecast** sheet anchored on 2024 and 2025 actuals with a blank **Forecast** measure for Jan–Dec 2026.
-
 - Generate a statistical forecast in the **Forecast** measure using Trend Decomposition with MSTL, annual and quarterly seasonality, and a 4% growth factor.
-
 - Compare January 2026 actuals against the forecasted value.
-
 - Close the January 2026 period and extend the forecast horizon to January 2027.
-
 - Reforecast January 2027 by seeding it from January 2026 actuals and applying a growth assumption.
-
 - Configure a writeback destination and writeback settings, then write the forecast back to the Fabric SQL database.
-
 - Verify the written-back data in the database and review the writeback logs.
 
-**Architecture**
+
+### Architecture
 
 The analyst opens the Acme_Beverages_Plan planning app, which reads sales actuals from the semantic model and builds a Rolling Forecast sheet. Statistical Forecasting (MSTL) populates the Forecast measure, and Close Period and Reforecast keep it current as new actuals arrive. Writeback then commits the finalized forecast to the Forecast table in the Acme_Beverages Fabric SQL database, where the results and writeback logs are verified.
 
-![](./media/image1.png)
+![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image1.png)
 
-**Prerequisites**
+### Prerequisites
 
 - Completion of Lab 01, including the **Acme_Beverages_Plan** app.
-
 - The database connection and the **Acme_Beverages** Fabric SQL database created in Lab 01.
-
 - Access to your folder in the training workspace.
+
 
 ## Exercise 1: Create the Rolling Forecast
 
@@ -58,159 +48,162 @@ In this exercise, you set up the **Forecast** sheet anchored on 2024 and 2025 ac
 
 ### Task 1: Set up the Forecast sheet
 
-In this task, you create a new Planning sheet named **Forecast** and lay out the products by row and the date hierarchy by column. The **Forecast** measure and statistical forecasting in later tasks build on this layout.
+In this task, you create a new Planning sheet named `Forecast` and lay out the products by row and the date hierarchy by column. The **Forecast** measure and statistical forecasting in later tasks build on this layout.
 
-1.  In Fabric, select the **Acme_Beverages_Plan** app tab that you created in Lab 01.
+1. In Fabric, select the **Acme_Beverages_Plan** app tab that you created in Lab 01.
 
-2.  On the **Home** tab, in the **Create** group, select **New Planning Sheet**.
+1. On the **Home** tab, in the **Create** group, select **New Planning Sheet**.
 
-    ![](./media/image2.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image2.png)
 
-3.  In the **New Planning Sheet** dialog, in the **Name** box, enter +++Forecast+++.
+1. In the **New Planning Sheet** dialog, in the **Name** box, enter `Forecast`.
 
-4.  Select **Create**.
+1. Select **Create**.
 
-    ![](./media/image3.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image3.png)
+
 
     The **Forecast** sheet is added to the **Explorer** pane and opens.
 
-5.  In the **Data** pane, expand **Semantic Model** \> **Dim skus**.
+1. In the **Data** pane, expand **Semantic Model** \> **Dim skus**.
 
-6.  Select the **Brand** checkbox.
+1. Select the **Brand** checkbox.
 
-7.  Select the **Category** checkbox.
+1. Select the **Category** checkbox.
 
-    ![](./media/image4.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image4.png)
 
     **Brand** and **Category** appear under **Fields** \> **Assign Data** \> **Rows**, and the grid lists each brand with its category, such as **AquaSplash** \> **Hard Seltzer**.
 
-8.  In the **Data** pane, expand **Semantic Model** \> **Dim Date**.
+1. In the **Data** pane, expand **Semantic Model** \> **Dim Date**.
 
-9.  Select the **Date Hierarchy** checkbox.
+1. Select the **Date Hierarchy** checkbox.
 
-    ![](./media/image5.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image5.png)
 
     **Date Hierarchy** appears under **Fields** \> **Assign Data** \> **Columns** with the levels **Year**, **Quarter Name**, and **Month Short Name**.
 
-10. In the **Data** pane search box, enter +++Gross Revenue+++.
+1. In the **Data** pane search box, enter `Gross Revenue`.
 
-11. Select the **Gross Revenue** checkbox.
+1. Select the **Gross Revenue** checkbox.
 
     **Gross Revenue** appears under **Fields** \> **Assign Data** \> **Values**, and the grid shows gross revenue by brand, category, and period.
 
-12. In the **Fields** pane, on the **Assign Data** tab, confirm that **Rows** contains **Brand** and **Category**, **Columns** contains **Date Hierarchy** with **Year**, **Quarter Name**, and **Month Short Name**, and **Values** contains **Gross Revenue**.
+1. In the **Fields** pane, on the **Assign Data** tab, confirm that **Rows** contains **Brand** and **Category**, **Columns** contains **Date Hierarchy** with **Year**, **Quarter Name**, and **Month Short Name**, and **Values** contains **Gross Revenue**.
 
-    ![](./media/image6.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image6.png)
 
-13. On the right sidebar, select the **Filter** icon.
+1. On the right sidebar, select the **Filter** icon.
 
     The **Filter** pane opens with **Page level** filters for **Brand**, **Category**, **Year**, **Quarter Name**, and **Month Short Name**.
 
-14. In the **Filter** pane, under **Page level**, expand the **Year** filter card.
+1. In the **Filter** pane, under **Page level**, expand the **Year** filter card.
 
-15. On the **Basic** tab, select the **2024** checkbox.
+1. On the **Basic** tab, select the **2024** checkbox.
 
-16. Select the **2025** checkbox.
+1. Select the **2025** checkbox.
 
-    ![](./media/image7.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image7.png)
 
     The **Year** filter card shows **is '2024, 2025'**, and the grid shows **Gross Revenue** columns for **2024** and **2025** only.
 
-17. Select **Planning** \> **Totals**.
+1. Select **Planning** \> **Totals**.
 
-18. In the **Totals** menu, in the **Column Subtotal** list, select **Left**.
+1. In the **Totals** menu, in the **Column Subtotal** list, select **Left**.
 
-    ![](./media/image8.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image8.png)
 
     Column subtotals appear on the left side of the column groups in the grid.
+
 
 ### Task 2: Create the Forecast measure
 
 In this task, you create the **Forecast** measure from the **Model** tab. This measure holds the forecasted values that extend the 2024 and 2025 actuals into 2026.
 
-1.  On the **Model** tab, in the **Rolling Forecast** group, select **Forecast**.
+1. On the **Model** tab, in the **Rolling Forecast** group, select **Forecast**.
 
-    ![](./media/image9.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image9.png)
 
-2.  In the **Save changes to proceed** dialog, select **Save and continue**.
+1. In the **Save changes to proceed** dialog, select **Save and continue**.
 
-    ![](./media/image10.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image10.png)
 
     Your changes are saved, and the **Insert Forecast Measures** dialog opens on the **Basics** page.
 
-3.  On the **Basics** page, enter the following details:
+1. On the **Basics** page, enter the following details:
 
     | Setting | Value |
     |---|---|
-    | Measure Name | +++Forecast+++ |
+    | Measure Name | `Forecast` |
     | Forecast Period | **Jan 2026 - Dec 2026** |
     | Multi Dimension Allocation | **Off** |
 
-    ![](./media/image11.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image11.png)
 
-4.  Select **Next**.
+1. Select **Next**.
 
     The **Closed Periods** page opens.
 
-5.  On the **Closed Periods** page, enter the following details:
+1. On the **Closed Periods** page, enter the following details:
 
     | Setting | Value |
     |---|---|
     | Configure as | **Link to Measure** |
     | Source Measure | **Gross Revenue** |
 
-    ![](./media/image12.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image12.png)
 
-6.  Select **Next**.
+1. Select **Next**.
 
     Closed periods of the **Forecast** measure now mirror the **Gross Revenue** actuals and stay locked for editing. The **Open Periods** page opens.
 
-7.  On the **Open Periods** page, enter the following details:
+1. On the **Open Periods** page, enter the following details:
 
     | Setting | Value |
     |---|---|
     | Configure as | **Data Input** |
     | Default Value | **None** |
 
-    ![](./media/image13.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image13.png)
 
-8.  Select **Save**.
+1. Select **Save**.
 
-    ![](./media/image14.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image14.png)
 
     The **Insert Forecast Measures** dialog closes, and the **Forecast** measure appears in the grid next to **Gross Revenue**.
 
-9.  Review the **Forecast** columns for **2024** and **2025** in the grid.
+1. Review the **Forecast** columns for **2024** and **2025** in the grid.
 
-    ![](./media/image15.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image15.png)
 
     The **Forecast** values for **2024** and **2025** are greyed out and match **Gross Revenue**, which shows that these years are closed periods. The **2026** **Forecast** column is empty. It appears because the forecast period covers 2026, even though the **Year** filter is limited to **2024** and **2025**. **Gross Revenue** shows no 2026 column.
 
-10. In the **Year** column header row, select the expand arrow (**\>**) next to **2026**.
+1. In the **Year** column header row, select the expand arrow (**\>**) next to **2026**.
 
-    ![](./media/image16.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image16.png)
 
     The **2026** header expands to show the quarter columns, starting with **Q1**. These open forecast periods are empty and ready for forecasting.
 
-11. In the grid, hover over a brand row header, such as **AquaSplash**.
+1. In the grid, hover over a brand row header, such as **AquaSplash**.
 
-12. Select the row menu icon to the left of the row.
+1. Select the row menu icon to the left of the row.
 
-13. In the menu, select **Collapse**.
+1. In the menu, select **Collapse**.
 
-14. In the **Collapse** submenu, select the **Specific Level** drop-down.
+1. In the **Collapse** submenu, select the **Specific Level** drop-down.
 
-15. Select **Category**.
+1. Select **Category**.
 
-    ![](./media/image17.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image17.png)
 
     The row headers collapse to the **Category** level, which makes the category-level values easier to examine.
 
-16. Review the collapsed grid.
+1. Review the collapsed grid.
 
-    ![](./media/image18.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image18.png)
 
     The grid shows the **All** row, followed by each brand with its category beneath it, such as **AquaSplash** \> **Hard Seltzer** and **Artisan Ale** \> **Beer**.
+
 
 ## Exercise 2: Generate Statistical Forecast
 
@@ -220,96 +213,97 @@ In this exercise, you run Statistical Forecast on 24 months of historical actual
 
 In this task, you configure and run the Predict feature on the grand total of the **Forecast** measure. The model uses Trend Decomposition with MSTL to detect annual and quarterly seasonal patterns, so the 2026 forecast reflects seasonal demand.
 
-1.  In the grid, select the cell where the **All** row meets the **2026** **Total** **Forecast** column.
+1. In the grid, select the cell where the **All** row meets the **2026** **Total** **Forecast** column.
 
-2.  On the ribbon, select **Model** \> **Predict**.
+1. On the ribbon, select **Model** \> **Predict**.
 
-    ![](./media/image19.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image19.png)
 
     The **Predict** pane opens.
 
-3.  Confirm that **Row Selected** is set to **GrandTotal** and **Measure Selected** is set to **Forecast**.
+1. Confirm that **Row Selected** is set to **GrandTotal** and **Measure Selected** is set to **Forecast**.
 
-4.  Select the lock icon next to **Row Selected**.
+1. Select the lock icon next to **Row Selected**.
 
-5.  Select the lock icon next to **Measure Selected**.
+1. Select the lock icon next to **Measure Selected**.
 
     The row and measure selections are locked so that they do not change while you configure the forecast.
 
-6.  Under **Set Period Range**, confirm the following default values:
+1. Under **Set Period Range**, confirm the following default values:
 
     | Setting | Value |
     |---|---|
     | Historic Data Range | **Jan 2024 - Dec 2025** |
     | Forecast Date Range | **Jan 2026 - Dec 2026** |
 
-    ![](./media/image20.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image20.png)
 
-7.  Under **Configure Forecast**, enter the following details:
+1. Under **Configure Forecast**, enter the following details:
 
     - Select Profile - **Profile 1**
-
-    - Confidence (%) - +++90+++
-
-    - Growth Factor (%) - +++4+++
+    - Confidence (%) - `90`
+    - Growth Factor (%) - `4`
 
     | Setting | Value |
     |---|---|
     | Evaluation | **Bottom Up** |
     | Round all negative values to zero | **No** |
 
-    ![](./media/image21.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image21.png)
 
-    **Note:** **Confidence (%)** indicates the level of certainty that the actual value falls within the predicted range.
+    >[!Note] Confidence (%)** indicates the level of certainty that the actual value falls within the predicted range.
 
-8.  Under **Choose Algorithm**, confirm that **Trend Decomposition with MSTL** is selected.
 
-    ![](./media/image22.png)
+1. Under **Choose Algorithm**, confirm that **Trend Decomposition with MSTL** is selected.
 
-    **Note:** **Trend Decomposition with MSTL** splits the series into separate layers, one per seasonal cycle plus a trend, forecasts each layer independently, and then combines them. It fits beverage sales data, where patterns repeat at both the annual and quarterly levels.
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image22.png)
 
-9.  Under **Customize Algorithm** \> **Set Seasonality**, select both the **Year** and **Quarter** check boxes.
+    >[!Note] Trend Decomposition with MSTL** splits the series into separate layers, one per seasonal cycle plus a trend, forecasts each layer independently, and then combines them. It fits beverage sales data, where patterns repeat at both the annual and quarterly levels.
+
+1. Under **Customize Algorithm** \> **Set Seasonality**, select both the **Year** and **Quarter** check boxes.
 
     The model detects and accounts for seasonal patterns at both cycle levels at the same time.
 
-10. Select **Run Forecast**.
+1. Select **Run Forecast**.
 
-    ![](./media/image23.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image23.png)
 
     The forecast preview opens in the **Predict** pane. The chart shows historical data in grey, predicted values in green, and the confidence range as green shading.
 
-11. Review the predicted values in the **Forecast Table** below the chart, including the **Period**, **Type**, **Value**, **Confidence Range (+)**, and **Confidence Range (-)** columns.
+1. Review the predicted values in the **Forecast Table** below the chart, including the **Period**, **Type**, **Value**, **Confidence Range (+)**, and **Confidence Range (-)** columns.
+
 
 ### Task 2: Save the forecast to the Forecast measure
 
 In this task, you save the predicted values to the **Forecast** measure so that they appear in the grid.
 
-1.  Select **Save Forecast**.
+1. Select **Save Forecast**.
 
-    ![](./media/image24.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image24.png)
 
     The **Save to Forecast Measure** dialog opens.
 
-2.  In the **Save to Forecast Measure** dialog, confirm the following values:
+1. In the **Save to Forecast Measure** dialog, confirm the following values:
 
     | Setting | Value |
     |---|---|
     | Select Measure | **Forecast** |
     | Date Range | **Jan 2026 - Dec 2026** |
 
-    **Important:** Existing values in the selected date range are overwritten, and the open period is extended to match the date range.
+    >[!Important] Existing values in the selected date range are overwritten, and the open period is extended to match the date range.
 
-3.  Select **Save**.
+1. Select **Save**.
 
-    ![](./media/image25.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image25.png)
 
     The forecasted values are saved to the **Forecast** measure for **Jan 2026 - Dec 2026**.
 
-4.  Review the **2026** columns in the grid.
+1. Review the **2026** columns in the grid.
 
-    ![](./media/image26.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image26.png)
 
     The **Values saved** notification appears. The statistical forecast is calculated at the grand total level and distributed across the row and column hierarchies, so every brand and category shows **Forecast** values for **Total**, **Q1**, **Q2**, **Q3**, and **Q4** of 2026.
+
 
 ## Exercise 3: Close the Period, Extend, and Reforecast
 
@@ -319,61 +313,62 @@ In this exercise, you close January 2026 to lock in its actuals, extend the fore
 
 In this task, you add 2026 to the year filter and compare the January 2026 forecast with the January 2026 actuals. This comparison shows the gap that closing the period resolves.
 
-1.  In the right sidebar, select the **Filter** icon.
+1. In the right sidebar, select the **Filter** icon.
 
     The **Filter** pane opens.
 
-2.  Under **Page level**, select the **Year** filter card to expand it.
+1. Under **Page level**, select the **Year** filter card to expand it.
 
-3.  On the **Basic** tab, select the **2026** check box, and keep **2024** and **2025** selected.
+1. On the **Basic** tab, select the **2026** check box, and keep **2024** and **2025** selected.
 
-    ![](./media/image27.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image27.png)
 
     The **Year** filter shows **is '2024, 2025, 2026'**, and the grid shows **Gross Revenue** and **Forecast** columns for 2026.
 
-4.  In the grid, expand the **2026** \> **Q1** column headers to show the **Jan**, **Feb**, and **Mar** columns.
+1. In the grid, expand the **2026** \> **Q1** column headers to show the **Jan**, **Feb**, and **Mar** columns.
 
-5.  Under **2026** \> **Q1** \> **Jan**, compare the **Gross Revenue** and **Forecast** values in the **All** row.
+1. Under **2026** \> **Q1** \> **Jan**, compare the **Gross Revenue** and **Forecast** values in the **All** row.
 
-    ![](./media/image28.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image28.png)
 
     The **Gross Revenue** column shows the January 2026 actual of **1,552.99**. The **Forecast** column shows the value that you generated in the previous exercise.
 
-    **Note:** Your **Forecast** value for January 2026 can differ slightly from the reference value. After you close the period in the next task, the January 2026 **Forecast** value is replaced automatically with the **Gross Revenue** actuals.
+    >[!Note] Your **Forecast** value for January 2026 can differ slightly from the reference value. After you close the period in the next task, the January 2026 **Forecast** value is replaced automatically with the **Gross Revenue** actuals.
+
 
 ### Task 2: Close January and extend the forecast
 
 In this task, you close the January 2026 period so that its actuals are locked in and the forecast horizon extends by one month. This step keeps the rolling forecast current as new actuals arrive.
 
-1.  On the ribbon, select the **Model** tab.
+1. On the ribbon, select the **Model** tab.
 
-2.  In the **Rolling Forecast** group, select **Close Period**.
+1. In the **Rolling Forecast** group, select **Close Period**.
 
-    ![](./media/image29.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image29.png)
 
-3.  In the **Close Period** dialog, confirm that **Select Measure** is set to **Forecast**.
+1. In the **Close Period** dialog, confirm that **Select Measure** is set to **Forecast**.
 
-4.  Select the **Close Period till** dropdown.
+1. Select the **Close Period till** dropdown.
 
-5.  Scroll down the list, and then select **Custom**.
+1. Scroll down the list, and then select **Custom**.
 
-6.  Confirm that **Selected Period** is set to **Jan 2026**.
+1. Confirm that **Selected Period** is set to **Jan 2026**.
 
-    **Note:** If **Selected Period** shows a different month, select the calendar icon, and then select **Jan 2026**.
+    >[!Note] If **Selected Period** shows a different month, select the calendar icon, and then select **Jan 2026**.
 
-7.  Select the **Extend Forecast Range** checkbox.
+1. Select the **Extend Forecast Range** checkbox.
 
-8.  Confirm that **Duration** is set to **1 Month**.
+1. Confirm that **Duration** is set to **1 Month**.
 
     When January 2026 closes, **Jan 2027** is added to the forecast horizon. This keeps a continuous 12-month forward window.
 
-9.  Select **Preview**.
+1. Select **Preview**.
 
-    ![](./media/image30.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image30.png)
 
     The **Confirm Close Period** dialog opens.
 
-10. In the **Confirm Close Period** dialog, verify the following values for the **Forecast** measure:
+1. In the **Confirm Close Period** dialog, verify the following values for the **Forecast** measure:
 
     | Setting | Value |
     |---|---|
@@ -382,43 +377,44 @@ In this task, you close the January 2026 period so that its actuals are locked i
 
     The open period starts in **Feb 2026**, and the forecast horizon now extends to **Jan 2027**.
 
-11. Select **Save**.
+1. Select **Save**.
 
-    ![](./media/image31.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image31.png)
 
     The dialog closes, and the closed period updates.
 
-12. In the grid, under **2026** \> **Q1** \> **Jan**, compare the **Gross Revenue** and **Forecast** columns for each **Brand** row.
+1. In the grid, under **2026** \> **Q1** \> **Jan**, compare the **Gross Revenue** and **Forecast** columns for each **Brand** row.
 
-    ![](./media/image32.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image32.png)
 
     The January 2026 **Forecast** values now match the **Gross Revenue** actuals, for example **1,552.99** in the **All** row. The **Forecast** cells are greyed out, which shows that January 2026 is a closed period.
 
-13. Under **2026** \> **Q1** \> **Jan**, review the **Gross Revenue** and **Forecast** values for each **Category** row.
+1. Under **2026** \> **Q1** \> **Jan**, review the **Gross Revenue** and **Forecast** values for each **Category** row.
 
-    ![](./media/image33.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image33.png)
 
     Each category's January **Forecast** value equals its **Gross Revenue** actual, for example **1,355.82** for **Beer** and **103.62** for **Hard Seltzer**. The **2026** \> **Total** **Forecast** value of **18,539.75** combines the closed January actuals with the forecast for the remaining open months.
 
-14. In the grid, expand **2027** and review the **Forecast** columns under **2027** \> **Q1** \> **Jan** for each **Category** row.
+1. In the grid, expand **2027** and review the **Forecast** columns under **2027** \> **Q1** \> **Jan** for each **Category** row.
 
-    ![](./media/image34.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image34.png)
 
     The forecast horizon now extends to **2027**. The **2027** **Forecast** cells are empty because the newly opened January 2027 period has no values yet.
+
 
 ### Task 3: Seed Jan 2027 with Jan 2026 actuals
 
 In this task, you use **Reforecast Column** to copy the January 2026 **Gross Revenue** actuals into the newly opened January 2027 forecast period. This gives the extended forecast horizon a realistic baseline instead of empty values.
 
-1.  On the ribbon, select **Model** \> **Reforecast Column**.
+1. On the ribbon, select **Model** \> **Reforecast Column**.
 
-    ![](./media/image35.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image35.png)
 
     The **Reforecast** dialog opens.
 
-2.  In the left pane of the **Reforecast** dialog, verify that **Forecast v1** is selected and that the **Jan 2027 - Jan 2027** range is selected.
+1. In the left pane of the **Reforecast** dialog, verify that **Forecast v1** is selected and that the **Jan 2027 - Jan 2027** range is selected.
 
-3.  Under **Set Period Range**, enter the following details:
+1. Under **Set Period Range**, enter the following details:
 
     | Setting | Value |
     |---|---|
@@ -427,43 +423,45 @@ In this task, you use **Reforecast Column** to copy the January 2026 **Gross Rev
     | Apply Operation | **Period Range** |
     | Source Periods | **Jan 2026 - Jan 2026** |
 
-4.  Select **Apply**.
+1. Select **Apply**.
 
-    ![](./media/image36.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image36.png)
 
     The dialog closes, and the grid refreshes with the reforecast values.
 
-5.  In the grid, under **2027** \> **Q1** \> **Jan**, review the **Forecast** values for each **Brand** row.
+1. In the grid, under **2027** \> **Q1** \> **Jan**, review the **Forecast** values for each **Brand** row.
 
-    ![](./media/image37.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image37.png)
 
     January 2027 now uses the January 2026 actuals as its starting values, for example **1,552.99** in the **All** row, **26.00** for **AquaSplash**, and **127.79** for **Artisan Ale**. The team now has a realistic baseline for the extended forecast horizon.
+
 
 ### Task 4: Apply a growth assumption to January 2027
 
 In this task, you apply a 4% growth assumption to the January 2027 forecast. This adjusts the baseline copied from the January 2026 actuals to reflect expected growth for the new period.
 
-1.  In the grid, under **2027** \> **Total**, double-click the **Forecast** cell in the **All** row.
+1. In the grid, under **2027** \> **Total**, double-click the **Forecast** cell in the **All** row.
 
     The cell enters edit mode, and the formula bar shows the current value **1552989286.05662**.
 
-2.  In the formula bar, place the cursor after the existing value, and then enter the following:
+1. In the formula bar, place the cursor after the existing value, and then enter the following:
 
     **+4%** (type a plus sign followed by 4%)
 
     The formula bar shows **=1552989286.05662+4%**, and the preview value **1,615,108,857.499** appears below it.
 
-3.  Select the check mark (**✓**) to the right of the formula bar.
+1. Select the check mark (**✓**) to the right of the formula bar.
 
-    ![](./media/image38.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image38.png)
 
     A **Values saved** notification appears.
 
-4.  In the grid, under **2027** \> **Q1** \> **Jan**, review the **Forecast** values for each **Brand** row.
+1. In the grid, under **2027** \> **Q1** \> **Jan**, review the **Forecast** values for each **Brand** row.
 
-    ![](./media/image39.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image39.png)
 
     January 2027 is now populated at **1,615.11** (in millions) in the **All** row. The 4% increase is distributed across the brands, for example **27.04** for **AquaSplash** and **132.90** for **Artisan Ale**.
+
 
 ## Exercise 4: Writeback
 
@@ -473,24 +471,24 @@ In this exercise, you commit the finalized **Forecast** to the Fabric SQL databa
 
 In this task, you add the **Forecast** table in the **Acme_Beverages** database as the writeback destination. This tells the planning app where to commit the finalized forecast values.
 
-1.  On the ribbon, select **Writeback** \> **Add destination**.
+1. On the ribbon, select **Writeback** \> **Add destination**.
 
-    ![](./media/image40.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image40.png)
 
     The **Create destination** dialog opens.
 
-2.  In the **Create destination** dialog, enter the following details:
+1. In the **Create destination** dialog, enter the following details:
 
     | Setting | Value |
     |---|---|
     | Select a Connection | the **Acme_Beverages** Fabric SQL connection that you created in Lab 01, Exercise 1, Task 12 |
     | Database Name | the SQL database that you created in Lab 01, Exercise 1, Task 4 (for example, **Acme_Beverages**) |
     | Schema | **dbo** |
-    | Table name | +++Forecast+++ |
+    | Table name | `Forecast` |
 
-    **Note:** The connection and database names in your environment differ from the screenshots, for example **Acme_Beverages User1-66670356 (2)** and **Acme_Beverages**. Select the connection and database that you created in Lab 01.
+    >[!Note] The connection and database names in your environment differ from the screenshots, for example **Acme_Beverages User1-66670356 (2)** and **Acme_Beverages**. Select the connection and database that you created in Lab 01.
 
-3.  In the **Create Destination** dialog, confirm that the connection, database, schema, and table details match the values you entered:
+1. In the **Create Destination** dialog, confirm that the connection, database, schema, and table details match the values you entered:
 
     | Setting | Value |
     |---|---|
@@ -499,349 +497,334 @@ In this task, you add the **Forecast** table in the **Acme_Beverages** database 
     | Schema | **dbo** |
     | Table Name | **Forecast** |
 
-    ![](./media/image41.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image41.png)
 
-4.  Scroll down in the **Create Destination** dialog, and then enter the following details:
+1. Scroll down in the **Create Destination** dialog, and then enter the following details:
 
     | Setting | Value |
     |---|---|
-    | Decimal Precision | +++2+++ |
+    | Decimal Precision | `2` |
     | Text Length | **Length of all string columns** with **512** selected |
 
-    **Important:** The decimal precision setting is a one-time action and cannot be changed later. Confirm that the value is **2** before you continue.
+    >[!Important] The decimal precision setting is a one-time action and cannot be changed later. Confirm that the value is **2** before you continue.
 
-    **Note:** You can select **Custom** under **Text Length** to set different lengths for individual string columns. For this lab, keep the default value of **512**.
+    >[!Note] You can select **Custom** under **Text Length** to set different lengths for individual string columns. For this lab, keep the default value of **512**.
 
-5.  Select **Add**.
+1. Select **Add**.
 
-    ![](./media/image42.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image42.png)
 
     A **Writeback settings saved successfully** message appears, and the **Destination added** dialog opens.
 
-6.  In the **Destination added** dialog, review the destination details:
+1. In the **Destination added** dialog, review the destination details:
 
     - **Destination ready for writeback** appears with a green check mark.
-
     - Table is **Forecast**.
-
     - Database is **Acme_Beverages**.
-
     - Under **ACME Beverages**, both **Verified – you have permission to make changes to this model** and **Verified – XMLA read-write is enabled** appear with green check marks.
 
-    ![](./media/image43.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image43.png)
 
-    **Note:** The **Add table to semantic model** option is recommended. It makes the writeback data available to Microsoft Fabric Ontology, Copilot, Fabric IQ, and Data agents. This lab does not use that option.
+    >[!Note] The **Add table to semantic model** option is recommended. It makes the writeback data available to Microsoft Fabric Ontology, Copilot, Fabric IQ, and Data agents. This lab does not use that option.
 
-7.  Select **Skip for now**.
 
-    ![](./media/image44.png)
+1. Select **Skip for now**.
+
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image44.png)
 
     The **Destination added** dialog closes, and the **Forecast** table in the **Acme_Beverages** database is set as the writeback destination.
 
-8.  Confirm that the **Destination saved successfully.** message appears in the upper-right corner, below the **Security** button.
+1. Confirm that the **Destination saved successfully.** message appears in the upper-right corner, below the **Security** button.
 
-    ![](./media/image45.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image45.png)
 
-    **Note:** Select **X** on the message to close it, or wait for it to close automatically.
+    >[!Note] Select **X** on the message to close it, or wait for it to close automatically.
+
 
 ### Task 2: Review the writeback types
 
 In this task, you open the writeback settings and review the writeback types available on the **General** tab. The writeback type controls how forecast values are stored in the **Forecast** table in the **Acme_Beverages** database.
 
-1.  On the **Writeback** ribbon, in the **General** group, select **Settings**.
+1. On the **Writeback** ribbon, in the **General** group, select **Settings**.
 
-    ![](./media/image46.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image46.png)
 
     The **Writeback Settings** panel opens.
 
-2.  Review the four tabs at the top of the **Writeback Settings** panel: **General**, **Data**, **Destinations**, and **Advanced**.
+1. Review the four tabs at the top of the **Writeback Settings** panel: **General**, **Data**, **Destinations**, and **Advanced**.
 
-    ![](./media/image47.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image47.png)
 
     The **General** tab is selected by default. It shows the **Writeback Type**, **Filter Type**, **Date Key Configuration**, **Decimal Precision**, and **Text Length** settings.
 
-3.  On the **General** tab, under **Writeback Type**, select the information icon next to **Long**.
+1. On the **General** tab, under **Writeback Type**, select the information icon next to **Long**.
 
-    ![](./media/image48.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image48.png)
 
     A tooltip appears with the description **Each cell is stored as a separate row.** and a **Preview** link.
 
-    **Note:** **Long** is selected by default. You review the remaining writeback types, **Wide**, **Long with Changes**, and **Wide with Changes**, in the same way by selecting the information icon next to each one.
+    >[!Note] Long** is selected by default. You review the remaining writeback types, `Wide`, **Long with Changes**, and **Wide with Changes**, in the same way by selecting the information icon next to each one.
 
-4.  In the **Long** tooltip, select **Preview**.
+1. In the **Long** tooltip, select **Preview**.
 
-    ![](./media/image49.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image49.png)
 
     The **Writeback Type** dialog opens with **Long** selected. The description reads **Long - Each cell value in the Planning Sheet is stored as a separate row in the database.** The **Preview** grid shows one row per cell value, with the columns **IrScenario**, **Category**, **Brand**, **Year**, **Quarter Name**, **Month Short Name**, **Value Column Name**, **Value**, **ValueText**, and **Last Updated At**. The **Value Column Name** column identifies the measure, such as **Forecast**.
 
-5.  Select **Cancel** to close the **Writeback Type** dialog.
+1. Select **Cancel** to close the **Writeback Type** dialog.
 
-6.  On the **General** tab, under **Writeback Type**, select the information icon next to **Wide**.
+1. On the **General** tab, under **Writeback Type**, select the information icon next to **Wide**.
 
-    ![](./media/image50.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image50.png)
 
     A tooltip appears with a **Preview** link.
 
-7.  In the **Wide** tooltip, select **Preview**.
+1. In the **Wide** tooltip, select **Preview**.
 
-    ![](./media/image51.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image51.png)
 
     The **Writeback Type** dialog opens with **Wide** selected. The description reads **Wide - Measures are stored as separate columns in the database.** The **Preview** grid shows the columns **IrScenario**, **Brand**, **Category**, **Year**, **Quarter Name**, **Month Short Name**, **Gross Revenue**, **Forecast**, and **IrWritebackUser**. Each measure has its own column, so **Gross Revenue** and **Forecast** appear side by side in the same row.
 
-8.  Select **Cancel** to close the **Writeback Type** dialog.
+1. Select **Cancel** to close the **Writeback Type** dialog.
 
-9.  On the **General** tab, under **Writeback Type**, select the information icon next to **Long with Changes**.
+1. On the **General** tab, under **Writeback Type**, select the information icon next to **Long with Changes**.
 
-    A tooltip appears with a **Preview** link.
+    `A tooltip appears with a **Preview** link.`
 
-10. In the **Long with Changes** tooltip, select **Preview**.
+1. In the **Long with Changes** tooltip, select **Preview**.
 
-    ![](./media/image52.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image52.png)
 
     The **Writeback Type** dialog opens with **Long with changes** selected. The description reads **Long with changes - Each cell value is stored with change history as separate rows.** The **Preview** grid uses the same row-per-value layout as **Long**. It adds a **Previous Value** column next to **Value** and an additional previous-value column next to **ValueText**. These columns show **null** until a value is changed.
 
-11. Select **Cancel** to close the **Writeback Type** dialog.
+1. Select **Cancel** to close the **Writeback Type** dialog.
 
-    **Note:** Use **Long** or **Wide** to store the current values only. Use **Long with Changes** or **Wide with Changes** to keep the previous value next to each new value so you can track forecast revisions over time.
+    >[!Note] Use **Long** or **Wide** to store the current values only. Use **Long with Changes** or **Wide with Changes** to keep the previous value next to each new value so you can track forecast revisions over time.
 
-12. Under **Writeback Type**, select the information icon next to **Wide with Changes**.
+1. Under **Writeback Type**, select the information icon next to **Wide with Changes**.
 
-    A tooltip appears with a **Preview** link.
+    `A tooltip appears with a **Preview** link.`
 
-13. In the **Wide with Changes** tooltip, select **Preview**.
+1. In the **Wide with Changes** tooltip, select **Preview**.
 
-    ![](./media/image53.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image53.png)
 
     The **Writeback Type** dialog opens with **Wide with changes** selected. The description reads **Wide with changes - Measures are stored as columns with change history.** The **Preview** grid includes the columns **IrScenario**, **Brand**, **Category**, **Year**, **Quarter Name**, **Month Short Name**, **Gross Revenue**, **Forecast**, **Is Latest**, and **IrWritebackUser**. The **Is Latest** column marks the most recent version of each row.
 
-14. Select **Cancel** to close the **Writeback Type** dialog.
+1. Select **Cancel** to close the **Writeback Type** dialog.
+
 
 ### Task 3: Set the writeback type and turn on the destination
 
 In this task, you select the **Long with Changes** writeback type so that the database keeps the previous value next to each new value, and then turn the destination back on.
 
-1.  On the **General** tab, under **Writeback Type**, select **Long with Changes**.
+1. On the **General** tab, under **Writeback Type**, select **Long with Changes**.
 
-    ![](./media/image54.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image54.png)
 
     A **Warning** dialog opens with the message **The selected writeback format does not support file or URL destinations. Changing the Writeback type will clear any selected Writeback destinations.**
 
-2.  In the **Warning** dialog, select **Proceed**.
+1. In the **Warning** dialog, select **Proceed**.
 
     **Long with Changes** is now the selected writeback type, and the configured writeback destination is turned off.
 
-    **Important:** Changing the writeback type turns off the existing writeback destination. Turn the destination back on before you run a writeback. Otherwise, no data is written to the database.
+    >[!Important] Changing the writeback type turns off the existing writeback destination. Turn the destination back on before you run a writeback. Otherwise, no data is written to the database.
 
-3.  On the ribbon, select **Writeback** \> **Manage**.
+1. On the ribbon, select **Writeback** \> **Manage**.
 
     The **Destinations (1)** list opens and shows the **Fabric SQL** destination for **Forecast**.
 
-4.  Select the toggle next to the **Fabric SQL** destination to turn it on.
+1. Select the toggle next to the **Fabric SQL** destination to turn it on.
 
-    ![](./media/image55.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image55.png)
 
     The toggle turns green and a confirmation message appears that the writeback settings were saved successfully. Under **Writeback Settings**, **Long with Changes** remains selected as the **Writeback Type**.
+
 
 ### Task 4: Review the filter, data, destination, and advanced settings
 
 In this task, you review the remaining writeback settings and limit the writeback to the **Forecast** series.
 
-1.  On the ribbon, select **Writeback** \> **Settings**.
+1. On the ribbon, select **Writeback** \> **Settings**.
 
-    ![](./media/image56.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image56.png)
 
     The **Writeback Settings** pane opens on the **General** tab.
 
-2.  On the **General** tab, scroll down to the **Filter** section, and then select the **Filter Type** drop-down list.
+1. On the **General** tab, scroll down to the **Filter** section, and then select the **Filter Type** drop-down list.
 
-    ![](./media/image57.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image57.png)
 
     The **Filter Type** list opens. This option controls which data is written back to the destination:
-
     - **None** - writes back the entire scenario without filtering.
-
     - **Calculated rows only** - writes back only calculated rows and any notes added to them.
-
     - **Custom Filters** - writes back only the data that matches the filters that you define.
 
-    **Note:** The **Data with Comments only** option writes back only cells that contain comments. It is available only for the **Long** writeback type, so it does not appear in the list when **Long with Changes** is selected.
+    >[!Note] The **Data with Comments only** option writes back only cells that contain comments. It is available only for the **Long** writeback type, so it does not appear in the list when **Long with Changes** is selected.
 
-3.  Keep **Filter Type** set to **None**.
 
-4.  Scroll down and review the remaining options on the **General** tab.
+1. Keep **Filter Type** set to **None**.
 
-    ![](./media/image58.png)
+1. Scroll down and review the remaining options on the **General** tab.
+
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image58.png)
 
     - **Date Key Configuration** - select **+ Add Date Key** to add date keys to the writeback table during writeback.
-
     - **Decimal Precision** - shows the number of digits after the decimal point, **2**. You set this value when you added the writeback destination.
-
     - **Text Length** - shows the maximum length of each string column. The default length is **512** characters for the **Category**, **Brand**, **Year**, **Quarter Name**, and **Month Short Name** columns. You can customize these lengths when you add the writeback destination.
 
-    **Note:** Confirm that **Writeback Type** is set to **Long with Changes**.
+    >[!Note] Confirm that **Writeback Type** is set to **Long with Changes**.
 
-5.  In the **Writeback Settings** pane, select the **Data** tab.
+
+1. In the **Writeback Settings** pane, select the **Data** tab.
 
     The **Data** tab opens. Use this tab to choose which measures are written back when a sheet contains multiple measures. You can also turn on automatic writeback and set the auto writeback event delay here.
 
-6.  Under **Series allowed for Writeback**, clear the **Gross Revenue** check box.
+1. Under **Series allowed for Writeback**, clear the **Gross Revenue** check box.
 
-    ![](./media/image59.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image59.png)
 
     Only the **Forecast** series remains selected for writeback. The **Enable Automatic Writeback** toggle stays off, and **Set Auto Writeback Event Delay** remains set to **5** seconds.
 
-7.  In the **Writeback Settings** pane, select the **Destinations** tab.
+1. In the **Writeback Settings** pane, select the **Destinations** tab.
 
-    ![](./media/image60.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image60.png)
 
-    The **Destinations** tab opens and lists the **Fabric SQL** destination named **Forecast** that you added earlier. Use the **info**, **edit**, and **delete** icons next to the destination to manage it, and select **+ Add New Destination** to add more destinations. You can manage multiple destinations from this tab.
+    The **Destinations** tab opens and lists the **Fabric SQL** destination named `Forecast` that you added earlier. Use the **info**, **edit**, and **delete** icons next to the destination to manage it, and select **+ Add New Destination** to add more destinations. You can manage multiple destinations from this tab.
 
-    **Important:** Do not select **Reset** under **Reset Destination**. This button resets all scenario values in the associated writeback destination tables, using the current visual data.
+    >[!Important] Do not select **Reset** under **Reset Destination**. This button resets all scenario values in the associated writeback destination tables, using the current visual data.
 
-8.  Select the **Advanced** tab.
+1. Select the **Advanced** tab.
 
-    ![](./media/image61.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image61.png)
 
     The **Advanced** tab opens with three options:
-
     - **Writeback column validation** - sets a validation rule for each writeback column, such as **Gross Revenue** and **Forecast**.
-
     - **Prevent writeback when validation fails** - blocks writeback when any validation rule fails.
-
     - **Writeback column rename** - renames a writeback column by using **Rename Writeback Column**.
 
-    **Important:** If you rename a writeback column after a writeback, the app sends a drop table request for the destination table.
+    >[!Important] If you rename a writeback column after a writeback, the app sends a drop table request for the destination table.
 
-9.  Under **Writeback column validation**, select the **Forecast** list to review the available validation rules.
 
-    ![](./media/image62.png)
+1. Under **Writeback column validation**, select the **Forecast** list to review the available validation rules.
+
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image62.png)
 
     The list shows three options:
-
     - **No Validation** - writes back all cells without checks.
-
     - **Cannot be empty** - excludes null cells from writeback.
-
     - **Enter Formula** - defines a condition that must evaluate to true for a cell to be written back.
 
-10. Under **Prevent writeback when validation fails**, review the toggle.
 
-    ![](./media/image63.png)
+1. Under **Prevent writeback when validation fails**, review the toggle.
+
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image63.png)
 
     When this toggle is on, writeback is prevented if any validation fails. You can turn it on only after you configure a validation rule.
 
-    **Note:** The **Prevent writeback when validation fails** setting does not apply to automatic writeback.
+    >[!Note] The **Prevent writeback when validation fails** setting does not apply to automatic writeback.
 
-11. Under **Writeback column rename**, select **Rename Writeback Column** to open the column rename dialog box.
+1. Under **Writeback column rename**, select **Rename Writeback Column** to open the column rename dialog box.
 
-    ![](./media/image64.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image64.png)
 
     The **Writeback column rename** dialog box opens. The **Name in Visual** column lists each visual field, such as **Gross Revenue**, **Forecast**, **Category**, **Brand**, **Year**, **Quarter Name**, and **Month Short Name**. The **Writeback column name** column shows the name used in the writeback table. To assign a custom column name instead of the source dataset name, select the pencil icon next to a writeback column name.
 
-    **Important:** If you rename a writeback column after a writeback, the app sends a drop table request for the destination table. Review the names now, but do not change them.
+    >[!Important] If you rename a writeback column after a writeback, the app sends a drop table request for the destination table. Review the names now, but do not change them.
 
-12. Select **X** to close the **Writeback column rename** dialog box.
+1. Select **X** to close the **Writeback column rename** dialog box.
 
-13. Close the **Settings** panel.
+1. Close the **Settings** panel.
 
     The rolling forecast sheet is displayed.
+
 
 ### Task 5: Run the writeback and verify the data
 
 In this task, you write the forecast back to the SQL database and check the **Forecast** table.
 
-1.  On the ribbon, select **Writeback** \> **Writeback**.
+1. On the ribbon, select **Writeback** \> **Writeback**.
 
-    ![](./media/image65.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image65.png)
 
     Within a few seconds, a **Writeback completed** confirmation appears. The forecast is written back to the **Acme_Beverages** SQL database.
 
-    ![](./media/image66.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image66.png)
 
-2.  In the Fabric left navigation pane, select the **Fabricplan-Day1@lab.LabInstance.Id** workspace to view the writeback tables in the database.
+1. In the Fabric left navigation pane, select the **Fabricplan-Day1@lab.LabInstance.Id** workspace to view the writeback tables in the database.
 
-    ![](./media/image67.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image67.png)
 
     The workspace panel opens and shows the **Day1-Plan** folder and the **\_\_fabric_plan_sys** items.
 
-3.  In the Fabric left navigation pane, in the **Fabricplan-Day1@lab.LabInstance.Id** workspace, select the **Day1-Plan** folder, and then select the **Acme_Beverages** item of type **SQL database**.
+1. In the Fabric left navigation pane, in the **Fabricplan-Day1@lab.LabInstance.Id** workspace, select the **Day1-Plan** folder, and then select the **Acme_Beverages** item of type **SQL database**.
 
-    ![](./media/image68.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image68.png)
 
     The **Acme_Beverages** SQL database opens, and the **Explorer** pane is displayed.
 
-4.  In the **Explorer** pane, expand **Acme_Beverages** \> **dbo** \> **Tables**.
+1. In the **Explorer** pane, expand **Acme_Beverages** \> **dbo** \> **Tables**.
 
-    ![](./media/image69.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image69.png)
 
     The **Tables** folder lists the **Forecast** table and the writeback tables that start with **wb\_**.
 
-5.  Select the **Forecast** table.
+1. Select the **Forecast** table.
 
-    ![](./media/image70.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image70.png)
 
     The **Data preview - Forecast** pane opens. It shows the **Category**, **Brand**, **Year**, **Value**, **IsLatest**, and **LastUpdated** columns. The rows for **2026** contain a **LastUpdated** timestamp, which confirms that the forecast was written back to the database.
+
 
 ### Task 6: Review the writeback logs
 
 In this task, you return to the planning app and confirm the writeback status in the logs.
 
-1.  In the Fabric left navigation pane, select the **Fabricplan-Day1@lab.LabInstance.Id** workspace.
+1. In the Fabric left navigation pane, select the **Fabricplan-Day1@lab.LabInstance.Id** workspace.
 
     The workspace panel opens and shows the items in the **Day1-Plan** folder.
 
-2.  In the workspace panel, under **Day1-Plan**, select **Acme_Beverages_Plan**.
+1. In the workspace panel, under **Day1-Plan**, select **Acme_Beverages_Plan**.
 
-    ![](./media/image71.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image71.png)
 
     The **Acme_Beverages_Plan** planning app opens.
 
-3.  In the **Acme_Beverages_Plan** planning app, select **Writeback** \> **Logs**.
+1. In the **Acme_Beverages_Plan** planning app, select **Writeback** \> **Logs**.
 
-    ![](./media/image72.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image72.png)
 
     The **Writeback Logs** page opens and lists one entry for each writeback.
 
-4.  On the **Writeback Logs** page, review the writeback entry. The entry includes the following details:
+1. On the **Writeback Logs** page, review the writeback entry. The entry includes the following details:
 
     - **ID**: The writeback identifier, for example **WB179309453415668**.
-
     - **Duration**: How long the writeback took, for example **7 Secs**.
-
     - **Status**: The writeback result. A successful writeback shows **Success**.
-
     - **Created At**: The date and time of the writeback.
-
     - **Started By**: The user who performed the writeback.
-
     - **Scenarios**: The scenario that was written back, for example **Base**.
-
     - **Incoming Row Count**: The number of rows sent to the database, for example **1815**.
 
-    ![](./media/image73.png)
+    ![](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2002/media/image73.png)
 
-    **Note:** Scroll right on the **Writeback Logs** page to see more columns, such as the measures that were saved and the writeback type.
+    >[!Note] Scroll right on the **Writeback Logs** page to see more columns, such as the measures that were saved and the writeback type.
 
     The log entry shows a **Success** status, which confirms that the forecast was written to the **Acme_Beverages** database.
 
-**Outcomes**
 
-- The **Forecast** sheet was built with 2024–2025 actuals and a blank **Forecast** measure covering Jan–Dec 2026.
+### Outcomes
 
-- A statistical forecast was run bottom-up across the full Jan–Dec 2026 horizon using 24 months of actuals, with the **Trend Decomposition** with **MSTL** algorithm and a 4% growth factor.
+    - The **Forecast** sheet was built with 2024–2025 actuals and a blank **Forecast** measure covering Jan–Dec 2026.
+    - A statistical forecast was run bottom-up across the full Jan–Dec 2026 horizon using 24 months of actuals, with the **Trend Decomposition** with **MSTL** algorithm and a 4% growth factor.
+    - January 2026 actuals were revealed and compared against the forecasted value (\$1,544M forecast vs. \$1,552M actual).
+    - January 2026 was closed. Actuals were locked in, and the forecast horizon was extended to Jan 2027.
+    - January 2027 was seeded from January 2026 actuals (\$1,552M) and reforecast at \$1,615M with a 4% growth assumption.
+    - The writeback destination was configured to the **Forecast** table in **Acme_Beverages** with the **Long with Changes** format.
+    - The forecast was written back to the SQL database and verified in the **Forecast** table.
+    - The writeback logs were reviewed to confirm the status, duration, writeback type, measures, and user.
 
-- January 2026 actuals were revealed and compared against the forecasted value (\$1,544M forecast vs. \$1,552M actual).
 
-- January 2026 was closed. Actuals were locked in, and the forecast horizon was extended to Jan 2027.
-
-- January 2027 was seeded from January 2026 actuals (\$1,552M) and reforecast at \$1,615M with a 4% growth assumption.
-
-- The writeback destination was configured to the **Forecast** table in **Acme_Beverages** with the **Long with Changes** format.
-
-- The forecast was written back to the SQL database and verified in the **Forecast** table.
-
-- The writeback logs were reviewed to confirm the status, duration, writeback type, measures, and user.
-
-**Summary**
+## Summary
 
 In this lab, you built a Forecast sheet using 2024–2025 actuals and created a blank Forecast measure covering Jan–Dec 2026. You ran a bottom-up Statistical Forecast across the full Jan–Dec 2026 horizon from 24 months of actuals, using the Trend Decomposition with MSTL algorithm and a 4% growth factor. You then revealed January 2026 actuals (\$1,552M) and compared them against the forecasted value. Next, you closed January 2026 to lock in actuals, which extended the forecast horizon to January 2027. You seeded January 2027 from January 2026 actuals and reforecast it at \$1,615M with a 4% growth assumption. Finally, you configured a writeback destination to the Forecast table in Acme_Beverages in the Long with Changes format, wrote the forecast back to the SQL database, verified it in the Forecast table, and reviewed the writeback logs to confirm the status, duration, writeback type, measures, and user.
