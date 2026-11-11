@@ -1,23 +1,10 @@
 # Lab 01: Build and optimize a sales plan on a Power BI semantic model with Plan in Microsoft Fabric
 
-**Scenario**
+## Scenario
 
-Acme Beverages is a global beverage company that sells beer, hard
-seltzer, and other drinks across North America, APAC, the EU, and Latin
-America. Leadership has asked Finance and Sales to prepare the 2026
-plan. Finance will set a top-down revenue target, weighting growth
-toward the second half of the year. Sales will build a bottom-up plan
-from 2025 actuals, including an agreed uplift for Summit Lager in North
-America and a summer promotion for Beer and Hard Seltzer in the EU and
-Latin America. The CFO has also set a \$12.5B gross profit goal, so the
-team must work out how much revenue growth and cost reduction are needed
-to reach it. Finally, plan changes must be routed through Regional
-Manager and Finance Director approval before the plan is finalized.
+Acme Beverages is a global beverage company that sells beer, hard seltzer, and other drinks across North America, APAC, the EU, and Latin America. Leadership has asked Finance and Sales to prepare the 2026 plan. Finance will set a top-down revenue target, weighting growth toward the second half of the year. Sales will build a bottom-up plan from 2025 actuals, including an agreed uplift for Summit Lager in North America and a summer promotion for Beer and Hard Seltzer in the EU and Latin America. The CFO has also set a \$12.5B gross profit goal, so the team must work out how much revenue growth and cost reduction are needed to reach it. Finally, plan changes must be routed through Regional Manager and Finance Director approval before the plan is finalized.
 
-To bring Finance and Sales together around one governed source of data,
-Acme Beverages plans directly on top of its Power BI semantic model in
-Microsoft Fabric. The solution uses the following key components:
-
+To bring Finance and Sales together around one governed source of data, Acme Beverages plans directly on top of its Power BI semantic model in Microsoft Fabric. The solution uses the following key components:
 - **Acme Beverages semantic model**: Provides the governed 2025 actuals,
   dimensions, and measures that the plan is built on.
 
@@ -33,34 +20,18 @@ Microsoft Fabric. The solution uses the following key components:
 - **Approval workflow**: Routes plan changes through Regional Manager
   and Finance Director review with Microsoft Teams notifications.
 
-In this lab, you are a financial planning analyst at Acme Beverages. You
-build the planning environment, set the top-down 2026 Sales Target,
-build the bottom-up 2026 Sales Plan, use the Optimizer to reach the
-CFO's gross profit goal, and optionally configure the approval workflow.
 
-**Introduction**
+In this lab, you are a financial planning analyst at Acme Beverages. You build the planning environment, set the top-down 2026 Sales Target, build the bottom-up 2026 Sales Plan, use the Optimizer to reach the CFO's gross profit goal, and optionally configure the approval workflow.
 
-In this lab, you build a complete planning environment in Microsoft
-Fabric from scratch. You import the Acme Beverages semantic model,
-create a Fabric SQL database, set up a Plan (preview) app, and configure
-semantic model and SQL database connections. You then create a planning
-sheet, explore the Plan interface, set a top-down 2026 Sales Target,
-build a bottom-up 2026 Sales Plan, and use the Optimizer to find the mix
-of revenue growth and cost reduction that meets a gross profit target.
-An optional final exercise shows how to configure a two-level approval
-workflow. Planning on a Power BI semantic model, with changes stored in
-a Fabric SQL database, removes disconnected spreadsheets and manual
-reconciliation. Built-in tools such as distribution, cell locking, Bulk
-Edit, comments, approvals, and the Optimizer help you model scenarios
-quickly and set targets you can defend.
+## Introduction
 
-**Objectives**
+In this lab, you build a complete planning environment in Microsoft Fabric from scratch. You import the Acme Beverages semantic model, create a Fabric SQL database, set up a Plan (preview) app, and configure semantic model and SQL database connections. You then create a planning sheet, explore the Plan interface, set a top-down 2026 Sales Target, build a bottom-up 2026 Sales Plan, and use the Optimizer to find the mix of revenue growth and cost reduction that meets a gross profit target. An optional final exercise shows how to configure a two-level approval workflow. Planning on a Power BI semantic model, with changes stored in a Fabric SQL database, removes disconnected spreadsheets and manual reconciliation. Built-in tools such as distribution, cell locking, Bulk Edit, comments, approvals, and the Optimizer help you model scenarios quickly and set targets you can defend.
+
+### Objectives
 
 After completing this lab, you will be able to:
-
 - Set up a planning environment by importing the Acme Beverages semantic
-  model, creating a Fabric SQL database, and building a Plan app with
-  semantic model and SQL database connections
+  model, creating a Fabric SQL database, and building a Plan app with semantic model and SQL database connections
 
 - Navigate the Plan interface, including the ribbons, header, Explorer
   pane, sidebar panels, and footer
@@ -77,2306 +48,1735 @@ After completing this lab, you will be able to:
 - Calculate gross profit with a formula column and run the Optimizer to
   achieve a \$12.5B gross profit target
 
-**Architecture**
 
-You import the Acme Beverages .pbix file, which creates a Power BI
-semantic model and report in a Fabric workspace. The Plan (preview) app
-connects to the semantic model for governed 2025 actuals and stores plan
-changes in a Fabric SQL database. Analysts build top-down and bottom-up
-planning sheets, run the Optimizer to reach the gross profit goal, and
-route changes through an approval workflow with Microsoft Teams
-notifications.
+### Architecture
 
-![Screenshot](media/image1.png)
+You import the Acme Beverages .pbix file, which creates a Power BI semantic model and report in a Fabric workspace. The Plan (preview) app connects to the semantic model for governed 2025 actuals and stores plan changes in a Fabric SQL database. Analysts build top-down and bottom-up planning sheets, run the Optimizer to reach the gross profit goal, and route changes through an approval workflow with Microsoft Teams notifications.
 
-**Prerequisites**
+![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image1.png)
+
+### Prerequisites
 
 - Access to a Microsoft Fabric workspace that meets the requirements in
-  the prerequisites document, with permission to create SQL databases
-  and Plan (preview) items
+  the prerequisites document, with permission to create SQL databases and Plan (preview) items
 
 - The **ACME Beverages.pbix** file downloaded from the lab **Resources**
-
 - Basic familiarity with Power BI semantic models, dimensions, and
   measures
 
 - Access to Microsoft Teams and a second user account (optional, for the
   approval workflow and @mention steps)
 
-# Exercise 1: Set up the planning environment
 
-In this exercise, you build the Acme Beverages planning environment with
-a workspace, semantic model, SQL database, Plan app, and connections.
+## Exercise 1: Set up the planning environment
 
-**Note:** When you name the Fabric SQL database, add your name as a
-suffix, for example Acme_Beverages_JohnS or Acme_Beverages_JS. Fabric
-adds a unique identifier to connection names automatically. The suffix
-keeps your items separate in shared workspaces, prevents naming
-conflicts, and makes your items easier to find and troubleshoot.
+In this exercise, you build the Acme Beverages planning environment with a workspace, semantic model, SQL database, Plan app, and connections.
 
-## Task 1: Create your training workspace
+>[!Note] When you name the Fabric SQL database, add your name as a suffix, for example Acme_Beverages_JohnS or Acme_Beverages_JS. Fabric adds a unique identifier to connection names automatically. The suffix keeps your items separate in shared workspaces, prevents naming conflicts, and makes your items easier to find and troubleshoot.
 
-In this task, you sign in to Microsoft Fabric and create a workspace on
-a Fabric capacity. This workspace holds the semantic model, SQL
-database, and Plan app that you use in the rest of the lab.
+### Task 1: Create your training workspace
 
-1.  In a browser, go to the following URL:
+In this task, you sign in to Microsoft Fabric and create a workspace on a Fabric capacity. This workspace holds the semantic model, SQL database, and Plan app that you use in the rest of the lab.
+
+1. In a browser, go to the following URL:
 
     +++https://app.fabric.microsoft.com/+++
 
-2.  In the **Email** field, enter
-    +++@lab.CloudPortalCredential(User1).Username+++, and then select
-    **Next**.
+1. In the **Email** field, enter +++@lab.CloudPortalCredential(User1).Username+++, and then select **Next**.
 
     The sign-in page asks for your password.
 
-3.  In the **Password** field, enter
-    +++@lab.CloudPortalCredential(User1).Password+++, and then select
-    **Sign in**.
+1. In the **Password** field, enter +++@lab.CloudPortalCredential(User1).Password+++, and then select **Sign in**.
 
     The Fabric **Home** page opens and shows **Welcome to Fabric**.
 
-4.  On the **Home** page, under **Welcome to Fabric**, select **New
-    workspace**.
+1. On the **Home** page, under **Welcome to Fabric**, select **New workspace**.
 
     The **Create a workspace** pane opens.
 
-    ![Screenshot](media/image2.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image2.png)
 
-5.  In the **Name** field, enter the following workspace name:
+1. In the **Name** field, enter the following workspace name:
 
-    +++Fabricplan-Day1@lab.LabInstance.Id+++
+    `Fabricplan-Day1@lab.LabInstance.Id`
 
     The message **This name is available** appears under the field.
 
-    **Note:** The screenshots show the workspace name
-    **Fabricplan-Day176895**. Your workspace name ends with your own lab
-    instance ID.
+    >[!Note] The screenshots show the workspace name `Fabricplan-Day176895`. Your workspace name ends with your own lab instance ID.
 
-6.  Select **Advanced** to expand the advanced settings.
+1. Select **Advanced** to expand the advanced settings.
 
-    The **Contact list** field shows your user as **(Owner)**, for example
-    **User1-64970352 (Owner)**.
+    The **Contact list** field shows your user as **(Owner)**, for example **User1-64970352 (Owner)**.
 
-    ![Screenshot](media/image3.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image3.png)
 
-7.  Under the workspace type options, select **Fabric**.
+1. Under the workspace type options, select **Fabric**.
 
-8.  In the **Details** list, select your Fabric capacity, for example
-    **fabriccapacity64970352 - West US 2**.
+1. In the **Details** list, select your Fabric capacity, for example **fabriccapacity64970352 - West US 2**.
 
-9.  Under **Semantic model storage format**, confirm that **Small
-    semantic model storage format** is selected.
+1. Under **Semantic model storage format**, confirm that **Small semantic model storage format** is selected.
 
-10. Select **Apply**.
+1. Select **Apply**.
 
     Fabric creates the workspace and opens it.
 
-    ![Screenshot](media/image4.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image4.png)
 
-## Task 2: Create a folder for the lab
 
-In this task, you create a folder in the workspace to hold the items for
-this lab. The folder keeps your Plan items together and separate from
-other content in the workspace.
+### Task 2: Create a folder for the lab
 
-1.  In the left navigation pane, select the
-    **Fabricplan-Day1@lab.LabInstance.Id** workspace.
+In this task, you create a folder in the workspace to hold the items for this lab. The folder keeps your Plan items together and separate from other content in the workspace.
 
-    The workspace opens and shows **Choose from predesigned task flows or
-    add a task to build one**.
+1. In the left navigation pane, select the **Fabricplan-Day1@lab.LabInstance.Id** workspace.
 
-    ![Screenshot](media/image5.png)
+    The workspace opens and shows **Choose from predesigned task flows or add a task to build one**.
 
-2.  On the workspace toolbar, select **New folder**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image5.png)
 
-    ![Screenshot](media/image6.png)
+1. On the workspace toolbar, select **New folder**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image6.png)
 
     The **New folder** dialog opens.
 
-3.  In the **New folder** dialog, enter the following folder name:
+1. In the **New folder** dialog, enter the following folder name:
 
-    +++Day1-Plan+++
+    `Day1-Plan`
 
-    ![Screenshot](media/image7.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image7.png)
 
-4.  Select **Create**.
+1. Select **Create**.
 
-    The **Day1-Plan** folder appears in the workspace item list, with
-    **Type** set to **Folder**.
+    The **Day1-Plan** folder appears in the workspace item list, with **Type** set to **Folder**.
 
-    ![Screenshot](media/image8.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image8.png)
 
-## Task 3: Import the PBIX file
 
-In this task, you import the **ACME Beverages** Power BI file into the
-**Day1-Plan** folder. The file contains the semantic model and report
-that the planning exercises use.
+### Task 3: Import the PBIX file
 
-1.  In the **Fabricplan-Day1@lab.LabInstance.Id** workspace, select the
-    **Day1-Plan** folder.
+In this task, you import the **ACME Beverages** Power BI file into the **Day1-Plan** folder. The file contains the semantic model and report that the planning exercises use.
 
-    The folder opens, and the breadcrumb shows
-    **Fabricplan-Day1@lab.LabInstance.Id** \> **Day1-Plan**.
+1. In the **Fabricplan-Day1@lab.LabInstance.Id** workspace, select the **Day1-Plan** folder.
 
-2.  On the workspace toolbar, select **Import** \> **Report, Paginated
-    Report or Workbook** \> **From this computer**.
+    The folder opens, and the breadcrumb shows **Fabricplan-Day1@lab.LabInstance.Id** \> **Day1-Plan**.
 
-    ![Screenshot](media/image9.png)
+1. On the workspace toolbar, select **Import** \> **Report, Paginated Report or Workbook** \> **From this computer**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image9.png)
 
     The **Open** dialog opens.
 
-3.  In the **Open** dialog, go to the folder where you saved the file
-    from **Resources**, for example **Local Disk (C:)** \> **Labfiles**.
+1. In the **Open** dialog, go to the folder where you saved the file from **Resources**, for example **Local Disk (C:)** \> **Labfiles**.
 
-4.  Select the **ACME Beverages** file.
+1. Select the **ACME Beverages** file.
 
-    ![Screenshot](media/image10.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image10.png)
 
-    **Note:** If you saved the file to another location, such as a
-    OneDrive folder, go to that folder and select the **ACME Beverages**
-    file there.
+    >[!Note] If you saved the file to another location, such as a OneDrive folder, go to that folder and select the **ACME Beverages** file there.
 
-    ![Screenshot](media/image11.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image11.png)
 
-5.  Select **Open**.
+1. Select **Open**.
 
-    The upload starts, and the **Uploading ACME Beverages.pbix**
-    notification appears in the upper-right corner of the workspace.
+    The upload starts, and the **Uploading ACME Beverages.pbix** notification appears in the upper-right corner of the workspace.
 
-    ![Screenshot](media/image12.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image12.png)
 
-    **Note:** The upload can take a few minutes. Don't select **Cancel
-    upload** while the file uploads.
+    >[!Note] The upload can take a few minutes. Don't select **Cancel upload** while the file uploads.
 
-6.  Verify that the **ACME Beverages** report and the **ACME Beverages**
-    semantic model appear in the **Day1-Plan** folder.
+1. Verify that the **ACME Beverages** report and the **ACME Beverages** semantic model appear in the **Day1-Plan** folder.
 
-    ![Screenshot](media/image13.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image13.png)
 
-    The **Type** column shows **Report** for one item and **Semantic
-    model** for the other.
+    The **Type** column shows **Report** for one item and **Semantic model** for the other.
 
-    **Note:** A warning such as **Refresh failed due to missing data
-    source credentials** can appear. A message that the data source
-    connection can't be validated can also appear. You can ignore these
-    messages. The imported .pbix file already contains the data, so you
-    can still map rows, columns, and values to your planning sheet.
+    >[!Note] A warning such as **Refresh failed due to missing data source credentials** can appear. A message that the data source connection can't be validated can also appear. You can ignore these messages. The imported .pbix file already contains the data, so you can still map rows, columns, and values to your planning sheet.
 
-## Task 4: Create a SQL database
 
-In this task, you create a SQL database in the workspace. The database
-stores the planning data that you work with in the later exercises.
+### Task 4: Create a SQL database
 
-1.  In the **Day1-Plan** folder toolbar, select **+ New item**.
+In this task, you create a SQL database in the workspace. The database stores the planning data that you work with in the later exercises.
+
+1. In the **Day1-Plan** folder toolbar, select **+ New item**.
 
     The **New item** pane opens.
 
-2.  In the **New item** pane search box, enter the following search
-    term:
+1. In the **New item** pane search box, enter the following search term:
 
-    +++sql+++
+    `sql`
 
-3.  Select **SQL database**.
+1. Select **SQL database**.
 
-    ![Screenshot](media/image14.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image14.png)
 
     The **New SQL database** dialog opens.
 
-4.  In the **Name** field, enter the following name, and then add your
-    name as a suffix, for example Acme_Beverages_JohnS:
+1. In the **Name** field, enter the following name, and then add your name as a suffix, for example Acme_Beverages_JohnS:
 
-    +++Acme_Beverages+++
+    `Acme_Beverages`
 
-    **Note:** The suffix keeps the database name unique. Use this name
-    wherever the lab refers to your SQL database.
+    >[!Note] The suffix keeps the database name unique. Use this name wherever the lab refers to your SQL database.
 
-5.  Select **Create**.
+1. Select **Create**.
 
-    ![Screenshot](media/image15.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image15.png)
 
-    The database is created and opens. The **Explorer** pane shows your
-    database, and the **Build your database** page appears.
+    The database is created and opens. The **Explorer** pane shows your database, and the **Build your database** page appears.
 
-    ![Screenshot](media/image16.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image16.png)
 
-6.  In the left navigation pane, select the
-    **Fabricplan-Day1@lab.LabInstance.Id** workspace icon.
+1. In the left navigation pane, select the **Fabricplan-Day1@lab.LabInstance.Id** workspace icon.
 
-    The workspace pane opens. Under **Fabricplan-Day1@lab.LabInstance.Id**
-    \> **Day1-Plan**, your SQL database appears, for example
-    **Acme_Beverages_JohnS**. Its SQL analytics endpoint, which has the
-    same name as your database, is nested under it.
+    The workspace pane opens. Under **Fabricplan-Day1@lab.LabInstance.Id** \> **Day1-Plan**, your SQL database appears, for example **Acme_Beverages_JohnS**. Its SQL analytics endpoint, which has the same name as your database, is nested under it.
 
-    ![Screenshot](media/image17.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image17.png)
 
-    **Note:** Fabric creates the SQL analytics endpoint automatically with
-    the SQL database. Your database name includes your own suffix, so it
-    can differ from **Acme_Beverages6857**.
+    >[!Note] Fabric creates the SQL analytics endpoint automatically with the SQL database. Your database name includes your own suffix, so it can differ from **Acme_Beverages6857**.
 
-7.  In the workspace pane, select
-    **Fabricplan-Day1@lab.LabInstance.Id**.
+1. In the workspace pane, select **Fabricplan-Day1@lab.LabInstance.Id**.
 
-    ![Screenshot](media/image18.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image18.png)
 
     The **Fabricplan-Day1@lab.LabInstance.Id** workspace opens.
 
-8.  In the workspace item list, select the **Day1-Plan** folder.
+1. In the workspace item list, select the **Day1-Plan** folder.
 
-    The breadcrumb shows **Fabricplan-Day1@lab.LabInstance.Id** \>
-    **Day1-Plan**. The folder contains the following items:
-
+    The breadcrumb shows **Fabricplan-Day1@lab.LabInstance.Id** \> **Day1-Plan**. The folder contains the following items:
     - **ACME Beverages** report
-
     - **ACME Beverages** semantic model
-
     - Your SQL database, for example **Acme_Beverages_JohnS**
-
     - **Acme_Beverages6857** SQL analytics endpoint
 
-    ![Screenshot](media/image19.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image19.png)
 
-## Task 5: Create a new Plan app
 
-In this task, you create a Plan app in the **Day1-Plan** folder. The
-Plan app is where you build the Planning, PowerTable, and Intelligence
-sheets for the Acme Beverages 2026 plan.
+### Task 5: Create a new Plan app
 
-1.  In the **Day1-Plan** folder toolbar, select **+ New item**.
+In this task, you create a Plan app in the **Day1-Plan** folder. The Plan app is where you build the Planning, PowerTable, and Intelligence sheets for the Acme Beverages 2026 plan.
+
+1. In the **Day1-Plan** folder toolbar, select **+ New item**.
 
     The **New item** pane opens with **All items** selected.
 
-2.  In the **New item** pane search box, enter +++plan+++.
+1. In the **New item** pane search box, enter `plan`.
 
-    The **Plan** tile appears with the description **Unify Planning + BI +
-    Data Apps on top of your Semantic Models and Ontologies with
-    writeback**.
+    The **Plan** tile appears with the description **Unify Planning + BI + Data Apps on top of your Semantic Models and Ontologies with writeback**.
 
-3.  Select the **Plan** tile.
+1. Select the **Plan** tile.
 
-    ![Screenshot](media/image20.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image20.png)
 
     The **New Plan** dialog opens.
 
-4.  In the **New Plan** dialog, in the **Name** field, enter
-    +++Acme_Beverages_Plan+++.
+1. In the **New Plan** dialog, in the **Name** field, enter `Acme_Beverages_Plan`.
 
-    ![Screenshot](media/image21.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image21.png)
 
-5.  Confirm that **Location** shows
-    **Fabricplan-Day1@lab.LabInstance.Id** \> **Day1-Plan**.
+1. Confirm that **Location** shows **Fabricplan-Day1@lab.LabInstance.Id** \> **Day1-Plan**.
 
-6.  Select **Create**.
+1. Select **Create**.
 
-    The **Acme_Beverages_Plan** app opens to the **How Would You Like To
-    Get Started?** screen. The **Get data** section lists **Semantic
-    Model** and **Excel / CSV**. The **Create new sheet** section lists
-    **Planning**, **PowerTable**, and **Intelligence**.
+    The **Acme_Beverages_Plan** app opens to the **How Would You Like To Get Started?** screen. The **Get data** section lists **Semantic Model** and **Excel / CSV**. The **Create new sheet** section lists **Planning**, **PowerTable**, and **Intelligence**.
 
-    ![Screenshot](media/image22.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image22.png)
 
-    **Note:** The **Home** tab also shows **New Planning Sheet**, **New
-    PowerTable Sheet**, and **New Intelligence Sheet**. The **Explorer
-    (0)** pane shows that the app has no sheets yet.
+    >[!Note] The **Home** tab also shows **New Planning Sheet**, **New PowerTable Sheet**, and **New Intelligence Sheet**. The **Explorer (0)** pane shows that the app has no sheets yet.
 
-## Task 6: Connect to the semantic model
 
-In this task, you create a shared cloud connection and use it to connect
-the Plan app to a semantic model. Planning and BI sheets need this
-connection to read and use semantic model data.
+### Task 6: Connect to the semantic model
 
-1.  On the **How Would You Like To Get Started?** screen, under **Get
-    data**, select **Semantic Model**.
+In this task, you create a shared cloud connection and use it to connect the Plan app to a semantic model. Planning and BI sheets need this connection to read and use semantic model data.
 
-    ![Screenshot](media/image23.png)
+1. On the **How Would You Like To Get Started?** screen, under **Get data**, select **Semantic Model**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image23.png)
 
     The **Select Semantic Model Connection** dialog opens.
 
-2.  In the **Select Semantic Model Connection** dialog, next to **Select
-    a Connection**, select **+ Create Connection**.
+1. In the **Select Semantic Model Connection** dialog, next to **Select a Connection**, select **+ Create Connection**.
 
-    ![Screenshot](media/image24.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image24.png)
 
     The **Create New Connection** dialog opens.
 
-    **Note:** The **Connection required** message explains that Planning
-    and BI sheet types need a shared cloud connection to access and use a
-    semantic model.
+    >[!Note] The **Connection required** message explains that Planning and BI sheet types need a shared cloud connection to access and use a semantic model.
 
-3.  Under **Connection credentials**, confirm that **Connection** shows
-    **Create new connection**.
+1. Under **Connection credentials**, confirm that **Connection** shows **Create new connection**.
 
-4.  In the **Connection name** field, enter +++Acme_Beverages+++.
+1. In the **Connection name** field, enter `Acme_Beverages`.
 
-5.  Confirm that **Authentication kind** shows **Organizational
-    account**.
+1. Confirm that **Authentication kind** shows **Organizational account**.
 
-6.  Under **You are not signed in. Please sign in.**, select **Sign
-    in**.
+1. Under **You are not signed in. Please sign in.**, select **Sign in**.
 
-    ![Screenshot](media/image25.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image25.png)
 
     The Microsoft **Pick an account** window opens.
 
-7.  In the **Pick an account** window, select your lab user account, for
-    example
-    [**User1-64970352@LODSPRODMCA.onmicrosoft.com**](mailto:User1-64970352@LODSPRODMCA.onmicrosoft.com).
+1. In the **Pick an account** window, select your lab user account, for example `User1-64970352@LODSPRODMCA.onmicrosoft.com`.
 
-    ![Screenshot](media/image26.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image26.png)
 
     The sign-in window closes, and you're signed in to the connection.
 
-    **Note:** Your lab user account is
-    +++@lab.CloudPortalCredential(User1).Username+++. The account shows
-    **Signed in** because you already signed in to Microsoft Fabric with
-    it.
+    >[!Note] Your lab user account is +++@lab.CloudPortalCredential(User1).Username+++. The account shows **Signed in** because you already signed in to Microsoft Fabric with it.
 
-8.  In the **Create New Connection** dialog, confirm that **You are
-    currently signed in.** appears under **Authentication kind**.
+1. In the **Create New Connection** dialog, confirm that **You are currently signed in.** appears under **Authentication kind**.
 
-9.  Select **Create**.
+1. Select **Create**.
 
-    ![Screenshot](media/image27.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image27.png)
 
-    The connection is created, and the **Create New Connection** dialog
-    closes. The new connection appears as **Acme_Beverages
-    User1-64970352**.
+    The connection is created, and the **Create New Connection** dialog closes. The new connection appears as **Acme_Beverages User1-64970352**.
 
-    **Note:** The number after **User1-** matches your lab user account,
-    +++@lab.CloudPortalCredential(User1).Username+++. Your connection name
-    might show a different number.
+    >[!Note] The number after **User1-** matches your lab user account, **@lab.CloudPortalCredential(User1).Username**. Your connection name might show a different number.
 
-10. In the **Select Semantic Model Connection** dialog, confirm that
-    **Select a Connection** shows **Acme_Beverages User1-64970352**.
+1. In the **Select Semantic Model Connection** dialog, confirm that **Select a Connection** shows **Acme_Beverages User1-64970352**.
 
-11. Under **Select Semantic model From**, confirm that **Semantic Model
-    Item** is selected.
+1. Under **Select Semantic model From**, confirm that **Semantic Model Item** is selected.
 
-12. Select the **Semantic Model** field.
+1. Select the **Semantic Model** field.
 
-    ![Screenshot](media/image28.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image28.png)
 
     The **OneLake catalog** opens on the **Choose a semantic model** page.
 
-13. In the semantic model list, select **ACME Beverages**.
+1. In the semantic model list, select **ACME Beverages**.
 
-    **Note:** The **Owner** of the **ACME Beverages** semantic model is
-    your lab user account. Its **Location** is your lab workspace, for
-    example, **Fabricplan-Day1@lab.LabInstance.Id**.
+    >[!Note] The **Owner** of the **ACME Beverages** semantic model is your lab user account. Its **Location** is your lab workspace, for example, **Fabricplan-Day1@lab.LabInstance.Id**.
 
-14. Select **Add**.
+1. Select **Add**.
 
-    ![Screenshot](media/image29.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image29.png)
 
-    The **OneLake catalog** closes, and the **Semantic Model** field shows
-    **ACME Beverages**.
+    The **OneLake catalog** closes, and the **Semantic Model** field shows **ACME Beverages**.
 
-15. In the **Select Semantic Model Connection** dialog, confirm that
-    **Select a Connection** shows **Acme_Beverages User1-64970352** and
-    **Semantic Model** shows **ACME Beverages**.
+1. In the **Select Semantic Model Connection** dialog, confirm that **Select a Connection** shows **Acme_Beverages User1-64970352** and **Semantic Model** shows **ACME Beverages**.
 
-16. Select **Connect**.
+1. Select **Connect**.
 
-    ![Screenshot](media/image30.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image30.png)
 
     The Plan app connects to the **ACME Beverages** semantic model.
 
-17. In the sidebar on the right side of the Plan app, select the
-    **Data** icon.
+1. In the sidebar on the right side of the Plan app, select the **Data** icon.
 
     The **Data** pane opens.
 
-18. On the **Data** pane, expand **Semantic Model**.
+1. On the **Data** pane, expand **Semantic Model**.
 
-19. Verify that the following tables appear under **Semantic Model**:
+1. Verify that the following tables appear under **Semantic Model**:
 
     - **Measure Table**
-
     - **Dim Countries**
-
     - **Dim Customers**
-
     - **Dim Date**
-
     - **Dim Regions**
-
     - **Dim skus**
-
     - **Fact Plan Forecast**
-
     - **Fact Transactions**
-
     - **P&L Data**
 
-    ![Screenshot](media/image31.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image31.png)
 
-    The dimension, measure, date, and fact tables from the **ACME
-    Beverages** semantic model are available for planning.
+    The dimension, measure, date, and fact tables from the **ACME Beverages** semantic model are available for planning.
 
-## Task 7: Create a new Planning sheet
 
-In this task, you create a Planning sheet in the Plan app. You use this
-sheet to build the 2026 sales plan from the **ACME Beverages** semantic
-model data.
+### Task 7: Create a new Planning sheet
 
-1.  In the Plan app, on the **Home** tab, select **New Planning Sheet**.
+In this task, you create a Planning sheet in the Plan app. You use this sheet to build the 2026 sales plan from the **ACME Beverages** semantic model data.
 
-    ![Screenshot](media/image32.png)
+1. In the Plan app, on the **Home** tab, select **New Planning Sheet**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image32.png)
 
     The **New Planning Sheet** dialog opens.
 
-2.  In the **Name** field, enter +++Plan Intro+++.
+1. In the **Name** field, enter `Plan Intro`.
 
-    ![Screenshot](media/image33.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image33.png)
 
-3.  Select **Create**.
+1. Select **Create**.
 
     A new Planning sheet named **Plan Intro** opens.
 
-## Task 8: Assign dimensions to rows
 
-In this task, you add the region and product dimensions to the rows of
-the Planning sheet. These fields set the levels at which you build and
-review the 2026 sales plan.
+### Task 8: Assign dimensions to rows
 
-1.  On the **Data** pane, expand **Semantic Model** \> **Dim Regions**.
+In this task, you add the region and product dimensions to the rows of the Planning sheet. These fields set the levels at which you build and review the 2026 sales plan.
+
+1. On the **Data** pane, expand **Semantic Model** \> **Dim Regions**.
 
     The **Region Name** field appears under **Dim Regions**.
 
-2.  In the sidebar on the right, select the **Fields** icon.
+1. In the sidebar on the right, select the **Fields** icon.
 
-3.  Drag **Region Name** into the **Rows** well on the **Fields** pane.
+1. Drag **Region Name** into the **Rows** well on the **Fields** pane.
 
     **Region Name** appears in the **Rows** well.
 
-4.  On the **Data** pane, expand **Dim skus**.
+1. On the **Data** pane, expand **Dim skus**.
 
-    The **Brand**, **Category**, **Multipack**, **Pack Format**, and **SKU
-    Code** fields appear under **Dim skus**.
+    The **Brand**, **Category**, **Multipack**, **Pack Format**, and **SKU Code** fields appear under **Dim skus**.
 
-5.  Drag **Category** into the **Rows** well, below **Region Name**.
+1. Drag **Category** into the **Rows** well, below **Region Name**.
 
-6.  Drag **Brand** into the **Rows** well, below **Category**.
+1. Drag **Brand** into the **Rows** well, below **Category**.
 
-    ![Screenshot](media/image34.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image34.png)
 
-    The **Rows** well lists **Region Name**, **Category**, and **Brand**.
-    On the **Data** pane, the **Region Name**, **Brand**, and **Category**
-    check boxes are selected.
+    The **Rows** well lists **Region Name**, **Category**, and **Brand**. On the **Data** pane, the **Region Name**, **Brand**, and **Category** check boxes are selected.
 
-    **Important:** Keep the order **Region Name** → **Category** →
-    **Brand**. Exercise 3 depends on this order (for example, **NA** \>
-    **Beer** \> **Summit Lager**). Some screenshots in this exercise show
-    **Brand** above **Category**; if your **Rows** well shows that order,
-    drag **Category** above **Brand**.
+    >[!Important] Keep the order **Region Name** → **Category** → **Brand**. Exercise 3 depends on this order (for example, **NA** \> **Beer** \> **Summit Lager**). Some screenshots in this exercise show **Brand** above **Category**; if your **Rows** well shows that order, drag **Category** above **Brand**.
 
-7.  Verify that the Planning sheet grid lists each region, starting with
-    **All** and **APAC**, with the product fields nested under each
-    region.
+1. Verify that the Planning sheet grid lists each region, starting with **All** and **APAC**, with the product fields nested under each region.
 
-    ![Screenshot](media/image35.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image35.png)
 
     The status bar shows **Session ready** and the row count for the grid.
 
-    **Note:** The order of the fields in the **Rows** well sets the
-    nesting in the grid. To change the nesting, drag a field up or down in
-    the **Rows** well. For example, place **Brand** above **Category** to
-    show each category under its brand.
+    >[!Note] The order of the fields in the **Rows** well sets the nesting in the grid. To change the nesting, drag a field up or down in the **Rows** well. For example, place **Brand** above **Category** to show each category under its brand.
 
-## Task 9: Assign the date hierarchy to columns
 
-In this task, you add the date hierarchy to the columns of the Planning
-sheet. This lets you plan and compare values by year, quarter, and
-month.
+### Task 9: Assign the date hierarchy to columns
 
-1.  On the **Data** pane, under **Semantic Model**, expand **Dim Date**.
+In this task, you add the date hierarchy to the columns of the Planning sheet. This lets you plan and compare values by year, quarter, and month.
 
-    The **Dim Date** fields appear, including **Date**, **Date
-    Hierarchy**, **Day**, **Month**, **Quarter**, and **Year**.
+1. On the **Data** pane, under **Semantic Model**, expand **Dim Date**.
 
-2.  Drag **Date Hierarchy** into the **Columns** well on the **Fields**
-    pane.
+    The **Dim Date** fields appear, including **Date**, **Date Hierarchy**, **Day**, **Month**, **Quarter**, and **Year**.
 
-    ![Screenshot](media/image36.png)
+1. Drag **Date Hierarchy** into the **Columns** well on the **Fields** pane.
 
-    The **Columns** well shows **Date Hierarchy** with the levels
-    **Year**, **Quarter Name**, and **Month Short Name**. On the **Data**
-    pane, the **Date Hierarchy** check box is selected.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image36.png)
 
-3.  Verify that the Planning sheet grid shows a **Year** column header
-    above the **Region Name** rows.
+    The **Columns** well shows **Date Hierarchy** with the levels **Year**, **Quarter Name**, and **Month Short Name**. On the **Data** pane, the **Date Hierarchy** check box is selected.
 
-    ![Screenshot](media/image37.png)
+1. Verify that the Planning sheet grid shows a **Year** column header above the **Region Name** rows.
 
-    The grid shows the year values, for example **2024**, as column
-    headers. The sheet title reads **by Region Name, Category, Brand,
-    Year, Quarter Name, Month Short Name**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image37.png)
 
-## Task 10: Assign measures to values
+    The grid shows the year values, for example **2024**, as column headers. The sheet title reads **by Region Name, Category, Brand, Year, Quarter Name, Month Short Name**.
 
-In this task, you add the **2025 Gross Revenue** measure to the values
-of the Planning sheet. This measure provides the 2025 actuals that the
-bottom-up plan is built on.
 
-1.  On the **Data** pane, under **Semantic Model** \> **Measure Table**,
-    expand the **Revenue** folder.
+### Task 10: Assign measures to values
 
-    The **Revenue** folder lists the measures **2025 Gross Revenue**,
-    **Gross Revenue**, **Revenue PY**, **Revenue YoY %**, **Revenue YTD**,
-    and **Total Net Revenue GC**.
+In this task, you add the **2025 Gross Revenue** measure to the values of the Planning sheet. This measure provides the 2025 actuals that the bottom-up plan is built on.
 
-2.  Drag **2025 Gross Revenue** into the **Values** well on the
-    **Fields** pane.
+1. On the **Data** pane, under **Semantic Model** \> **Measure Table**, expand the **Revenue** folder.
 
-    ![Screenshot](media/image38.png)
+    The **Revenue** folder lists the measures **2025 Gross Revenue**, **Gross Revenue**, **Revenue PY**, **Revenue YoY %**, **Revenue YTD**, and **Total Net Revenue GC**.
 
-    The **Values** well shows **2025 Gross Revenue**. On the **Data**
-    pane, the **2025 Gross Revenue** check box is selected.
+1. Drag **2025 Gross Revenue** into the **Values** well on the **Fields** pane.
 
-3.  Verify that the Planning sheet grid shows the **2025 Gross Revenue**
-    column, labeled **in Millions**, under the **2025** year header.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image38.png)
 
-    ![Screenshot](media/image39.png)
+    The **Values** well shows **2025 Gross Revenue**. On the **Data** pane, the **2025 Gross Revenue** check box is selected.
 
-    The grid shows **17,888.87** for **All** and **2,152.03** for
-    **APAC**.
+1. Verify that the Planning sheet grid shows the **2025 Gross Revenue** column, labeled **in Millions**, under the **2025** year header.
 
-## Task 11: Confirm your matrix is ready
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image39.png)
 
-In this task, you confirm that the Planning sheet matrix is complete and
-adjust the column width for readability. The matrix shows 2025 Gross
-Revenue by region, brand, and category across the date hierarchy.
+    The grid shows **17,888.87** for **All** and **2,152.03** for **APAC**.
 
-1.  Verify that the sheet title reads **2025 Gross Revenue by Region
-    Name, Category, Brand, Year, Quarter Name, Month Short Name**.
 
-2.  Point to the column header border between **Region Name** and **2025
-    Gross Revenue** until the sizing handle appears.
+### Task 11: Confirm your matrix is ready
 
-    ![Screenshot](media/image40.png)
+In this task, you confirm that the Planning sheet matrix is complete and adjust the column width for readability. The matrix shows 2025 Gross Revenue by region, brand, and category across the date hierarchy.
 
-3.  Drag the sizing handle to adjust the column width.
+1. Verify that the sheet title reads **2025 Gross Revenue by Region Name, Category, Brand, Year, Quarter Name, Month Short Name**.
 
-    The column resizes. The status bar shows **Session ready** with
-    **Rows: 125 Columns: 1**.
+1. Point to the column header border between **Region Name** and **2025 Gross Revenue** until the sizing handle appears.
 
-## Task 12: Set up a database connection for collaboration
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image40.png)
 
-In this task, you create a Fabric SQL connection for the plan. Workspace
-viewers need this connection to collaborate in Reading view.
+1. Drag the sizing handle to adjust the column width.
 
-1.  In the **Extra configuration recommended** banner above the Planning
-    sheet, select **Set up connection**.
+    The column resizes. The status bar shows **Session ready** with **Rows: 125 Columns: 1**.
 
-    ![Screenshot](media/image41.png)
+
+### Task 12: Set up a database connection for collaboration
+
+In this task, you create a Fabric SQL connection for the plan. Workspace viewers need this connection to collaborate in Reading view.
+
+1. In the **Extra configuration recommended** banner above the Planning sheet, select **Set up connection**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image41.png)
 
     The **Select Fabric SQL Connection** dialog opens.
 
-2.  In the **Select Fabric SQL Connection** dialog, select **+ Create
-    Connection**.
+1. In the **Select Fabric SQL Connection** dialog, select **+ Create Connection**.
 
-    ![Screenshot](media/image42.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image42.png)
 
     The **Create New Connection** dialog opens.
 
-3.  Under **Connection credentials**, select the **Connection**
-    drop-down.
+1. Under **Connection credentials**, select the **Connection** drop-down.
 
-4.  Select **Create new connection**.
+1. Select **Create new connection**.
 
-5.  In the **Connection name** field, enter +++Acme_Beverages+++.
+1. In the **Connection name** field, enter `Acme_Beverages`.
 
-6.  Verify that **Authentication kind** is set to **Organizational
-    account**.
+1. Verify that **Authentication kind** is set to **Organizational account**.
 
-7.  Verify that the **You are currently signed in as** section shows
-    your lab user account.
+1. Verify that the **You are currently signed in as** section shows your lab user account.
 
-8.  Select **Create**.
+1. Select **Create**.
 
-    ![Screenshot](media/image43.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image43.png)
 
-    Fabric creates the connection and returns you to the **Select Fabric
-    SQL Connection** dialog. Fabric adds your user identifier to the
-    connection name.
+    Fabric creates the connection and returns you to the **Select Fabric SQL Connection** dialog. Fabric adds your user identifier to the connection name.
 
-9.  In the **Select a Connection** drop-down, verify that the selected
-    connection name starts with **Acme_Beverages**, followed by your
-    user identifier.
+1. In the **Select a Connection** drop-down, verify that the selected connection name starts with `Acme_Beverages`, followed by your user identifier.
 
-    **Note:** The user identifier and the number in parentheses after the
-    connection name depend on your lab account. They might differ from the
-    example.
+    >[!Note] The user identifier and the number in parentheses after the connection name depend on your lab account. They might differ from the example.
 
-10. Select **Connect**.
+1. Select **Connect**.
 
-    **Note:** If the dialog asks for a database, select the SQL database
-    that you created in Task 4, for example **Acme_Beverages_JohnS**.
+    >[!Note] If the dialog asks for a database, select the SQL database that you created in Task 4, for example **Acme_Beverages_JohnS**.
 
-    ![Screenshot](media/image44.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image44.png)
 
-    The **Select Fabric SQL Connection** dialog closes, and the plan uses
-    the **Acme_Beverages** connection for viewer collaboration.
+    The **Select Fabric SQL Connection** dialog closes, and the plan uses the **Acme_Beverages** connection for viewer collaboration.
 
-11. In the upper-right corner, select the **Notifications** icon.
+1. In the upper-right corner, select the **Notifications** icon.
 
-    ![Screenshot](media/image45.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image45.png)
 
-    The **Notifications** pane opens and confirms that the SQL connection
-    is set up.
+    The **Notifications** pane opens and confirms that the SQL connection is set up.
 
-# Exercise 2: Explore the interface
 
-In this exercise, you explore the ribbons, header, Explorer pane,
-sidebar panels, and footer so that you can work confidently before you
-enter plan data.
+## Exercise 2: Explore the interface
 
-## Task 1: Explore the ribbons
+In this exercise, you explore the ribbons, header, Explorer pane, sidebar panels, and footer so that you can work confidently before you enter plan data.
 
-In this task, you switch to the full ribbon view and review the commands
-on each ribbon. Knowing where each command is helps you work faster in
-the later planning exercises.
+### Task 1: Explore the ribbons
 
-1.  Select the **Planning** tab.
+In this task, you switch to the full ribbon view and review the commands on each ribbon. Knowing where each command is helps you work faster in the later planning exercises.
 
-2.  At the right end of the ribbon, select the down arrow to switch to
-    the full ribbon view.
+1. Select the **Planning** tab.
 
-    ![Screenshot](media/image46.png)
+1. At the right end of the ribbon, select the down arrow to switch to the full ribbon view.
 
-    The ribbon expands and shows labeled command groups, such as **Layout
-    & Number**, **Rows & Columns**, **Tools**, **Actions**, and
-    **Default**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image46.png)
 
-    ![Screenshot](media/image47.png)
+    The ribbon expands and shows labeled command groups, such as **Layout & Number**, **Rows & Columns**, **Tools**, **Actions**, and **Default**.
 
-3.  Select the **Home** tab.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image47.png)
+
+1. Select the **Home** tab.
 
     The **Home** ribbon contains the following commands:
-
     - **New Planning Sheet**, **New PowerTable Sheet**, and **New
-      Intelligence Sheet**, which you use to add new sheets.
+    Intelligence Sheet**, which you use to add new sheets.
 
     - **Explore Model**, **Settings**, and **Manage Connections**.
 
-4.  Select the **Planning** tab again.
 
-    ![Screenshot](media/image48.png)
+1. Select the **Planning** tab again.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image48.png)
 
     The **Planning** ribbon contains the following commands:
-
     - Layout options - **Layout** and **Totals**.
-
     - Formatting options - **Quick format** and the percentage, currency,
-      and decimal buttons.
+    and decimal buttons.
 
     - Row and column commands - **Insert Row**, **Manage Rows**,
-      **Formula**, **Text**, **List**, **Number**, **Checkbox**, **Date**,
-      **Simulate**, **Person**, **Manage measures**, and **Show Columns**.
+    **Formula**, **Text**, **List**, **Number**, **Checkbox**, **Date**, **Simulate**, **Person**, **Manage measures**, and **Show Columns**.
 
     - Tools - **Tools**.
-
     - Actions - **Audit**, **Notes**, **Writeback**, **Reset**,
-      **Export**, and **Undo**.
+    **Export**, and **Undo**.
 
-    **Note:** In the compact ribbon view, the **Planning** ribbon also
-    shows **Bulk Edit** and **Pivot**.
+    >[!Note] In the compact ribbon view, the **Planning** ribbon also shows **Bulk Edit** and **Pivot**.
 
-5.  Select the **Model** tab.
 
-    ![Screenshot](media/image49.png)
+1. Select the **Model** tab.
 
-    The **Model** ribbon contains commands for forecasts, scenarios,
-    driver-based models, and cubes. The **Rolling Forecast** group
-    contains the following items:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image49.png)
 
+    The **Model** ribbon contains commands for forecasts, scenarios, driver-based models, and cubes. The **Rolling Forecast** group contains the following items:
     - Forecast commands - **Forecast**, **Extend Time**, **Reforecast
-      Column**, **Reforecast Row**, **Distribute Deficit**, and
-      **Predict**.
+    Column**, **Reforecast Row**, **Distribute Deficit**, and **Predict**.
 
     - A date range field that starts with **January 1st, 2024**.
-
     - The **Show Closed Periods** check box.
-
     - **Close Period**.
 
-    **Note:** Until you create a forecast, **Forecast** is the only
-    available command in the **Rolling Forecast** group. The other
-    commands appear dimmed.
+    >[!Note] Until you create a forecast, **Forecast** is the only available command in the **Rolling Forecast** group. The other commands appear dimmed.
 
-6.  Select the **Format** tab.
 
-    ![Screenshot](media/image50.png)
+1. Select the **Format** tab.
 
-    The **Format** ribbon contains conditional formatting and semantic
-    formatting options. It's organized into the following groups:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image50.png)
 
+    The **Format** ribbon contains conditional formatting and semantic formatting options. It's organized into the following groups:
     - **Display** - **Appearance**.
-
     - **Font** - Font name (**Segoe UI**), font size (**13**), increase
-      and decrease font size, bold, italic, underline, fill color, font
-      color, and borders.
+    and decrease font size, bold, italic, underline, fill color, font color, and borders.
 
     - **Alignment** - Text alignment, indent, and row height (**26**)
-      options, and **Auto Fit**.
+    options, and **Auto Fit**.
 
     - **Page Setup** - **Page Break**.
 
-7.  Select the **Writeback** tab.
 
-    ![Screenshot](media/image51.png)
+1. Select the **Writeback** tab.
 
-    The **Writeback** ribbon contains commands to write data to
-    destinations, manage settings, and view logs. It's organized into the
-    following groups:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image51.png)
 
+    The **Writeback** ribbon contains commands to write data to destinations, manage settings, and view logs. It's organized into the following groups:
     - **Writeback** - **Writeback**.
-
     - **Destination** - **Add destination** and **Manage**.
-
     - **Data** - **WB Type**, **Filter**, and **Mapping**.
-
     - **Logs** - **Logs**.
-
     - **General** - **Settings**.
 
-    **Note:** **Writeback**, **Manage**, and **Logs** appear dimmed in the
-    ribbon.
+    >[!Note] Writeback**, **Manage**, and **Logs** appear dimmed in the ribbon.
 
-## Task 2: Explore the header, Explorer pane, sidebar, and footer
 
-In this task, you explore the header, the **Explorer** pane, the
-sidebar, and the footer of a Plan sheet. You review the security,
-comment, editing, and save commands, and the panels that manage data,
-fields, filters, comments, bookmarks, and parameters. These controls
-help you secure the plan and move around it before you enter data.
+### Task 2: Explore the header, Explorer pane, sidebar, and footer
 
-1.  In the header, select **Security**.
+In this task, you explore the header, the **Explorer** pane, the sidebar, and the footer of a Plan sheet. You review the security, comment, editing, and save commands, and the panels that manage data, fields, filters, comments, bookmarks, and parameters. These controls help you secure the plan and move around it before you enter data.
 
-    ![Screenshot](media/image52.png)
+1. In the header, select **Security**.
 
-    The **Security** pane opens and lists the **Data Input**,
-    **Forecast**, **Scenario**, **Comments**, and **Writeback**
-    categories. **Data Input** is selected and shows the message **No data
-    input columns available.**
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image52.png)
 
-2.  In the **Security** pane, under **Roles**, select **Users**.
+    The **Security** pane opens and lists the **Data Input**, **Forecast**, **Scenario**, **Comments**, and **Writeback** categories. **Data Input** is selected and shows the message **No data input columns available.**
 
-    ![Screenshot](media/image53.png)
+1. In the **Security** pane, under **Roles**, select **Users**.
 
-    The **Users** view opens with the message **No Users Available** and
-    an **Assign Role** button. You use **Assign Role** to add users and
-    map them to roles that manage access and security permissions.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image53.png)
 
-3.  Under **Roles**, select **Roles**.
+    The **Users** view opens with the message **No Users Available** and an **Assign Role** button. You use **Assign Role** to add users and map them to roles that manage access and security permissions.
 
-    ![Screenshot](media/image54.png)
+1. Under **Roles**, select **Roles**.
 
-    The **Roles (1)** list opens with the **Item Baseline** role, labeled
-    **System Default**. The role settings are on the following tabs:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image54.png)
 
+    The **Roles (1)** list opens with the **Item Baseline** role, labeled **System Default**. The role settings are on the following tabs:
     - **General**
-
     - **Planning**
-
     - **PowerTable**
-
     - **Intelligence**
-
     - **Reading View Customization**
 
-    On the **General** tab, under **Select Sheets**, the **Plan Intro**
-    sheet has **Visible** turned on and **Read Only** turned off.
+    On the **General** tab, under **Select Sheets**, the **Plan Intro** sheet has **Visible** turned on and **Read Only** turned off.
 
-    **Note:** By default, this role can access all sheets. You can
-    configure individual sheets to restrict access or make them read-only.
-    You can also select **Add Roles** to create more roles.
+    >[!Note] By default, this role can access all sheets. You can configure individual sheets to restrict access or make them read-only. You can also select **Add Roles** to create more roles.
 
-4.  In the **Security** pane, select **Back to Sheet**.
 
-    ![Screenshot](media/image55.png)
+1. In the **Security** pane, select **Back to Sheet**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image55.png)
 
     The **Security** pane closes, and the **Plan Intro** sheet opens.
 
-5.  In the header, select the **Comments** drop-down arrow.
+1. In the header, select the **Comments** drop-down arrow.
 
-    ![Screenshot](media/image56.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image56.png)
 
-    The menu opens with **Add new comment**, **View all comments**, and
-    **Settings**. You use **Comments** to add comments to the plan and to
-    view existing comments. **Add new comment** stays unavailable until
-    you save your changes.
+    The menu opens with **Add new comment**, **View all comments**, and **Settings**. You use **Comments** to add comments to the plan and to view existing comments. **Add new comment** stays unavailable until you save your changes.
 
-6.  In the header, select the **Editing** drop-down arrow.
+1. In the header, select the **Editing** drop-down arrow.
 
-    ![Screenshot](media/image57.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image57.png)
 
     The menu lists the following views:
-
     - **Editing** (**Make any changes**) is selected by default.
-
     - **Reading** (**View the file, but make no changes**) opens the sheet
-      in read-only mode.
+    in read-only mode.
 
-    You use this menu to switch between the Editing view and the Reading
-    view.
+    You use this menu to switch between the Editing view and the Reading view.
 
-7.  In the toolbar, select **Save**.
 
-    ![Screenshot](media/image58.png)
+1. In the toolbar, select **Save**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image58.png)
 
     Your changes to the sheet are saved.
 
-    **Note:** If the sheet has unsaved changes, pointing to **Comments**
-    shows the message **Please save your changes to use Comments.** Select
-    **Save** before you work with comments.
+    >[!Note] If the sheet has unsaved changes, pointing to **Comments** shows the message **Please save your changes to use Comments.** Select **Save** before you work with comments.
 
-8.  In the toolbar, select the **Save** drop-down arrow.
+1. In the toolbar, select the **Save** drop-down arrow.
 
-    ![Screenshot](media/image59.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image59.png)
 
-    The menu opens and shows the **Discard all settings** option. This
-    option removes all unsaved changes and keeps the last saved version of
-    the sheet.
+    The menu opens and shows the **Discard all settings** option. This option removes all unsaved changes and keeps the last saved version of the sheet.
 
-    **Important:** Don't select **Discard all settings** now. Select it
-    only when you want to remove all unsaved changes.
+    >[!Important] Don't select **Discard all settings** now. Select it only when you want to remove all unsaved changes.
 
-9.  Next to **Explorer (1)**, select the collapse arrow (**«**).
+1. Next to **Explorer (1)**, select the collapse arrow (**«**).
 
-    ![Screenshot](media/image60.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image60.png)
 
     The **Explorer** pane collapses, and the sheet canvas gets more space.
 
-10. Select the expand arrow (**»**) to expand the **Explorer** pane
-    again.
+1. Select the expand arrow (**»**) to expand the **Explorer** pane again.
 
-    The **Explorer** pane opens. In the **Explorer** pane, you can do the
-    following:
-
+    The **Explorer** pane opens. In the **Explorer** pane, you can do the following:
     - Select **+ New Sheet** to add a sheet.
-
     - Use the **Search** box to find sheets.
-
     - Select a sheet in the list, for example **Plan Intro**, to open it.
 
-11. In the sidebar on the right, select the **Data** icon.
 
-    ![Screenshot](media/image61.png)
+1. In the sidebar on the right, select the **Data** icon.
 
-    The **Data** panel opens. The sidebar has six panels. You use the
-    **Data** panel to manage data from the semantic model, sheets, or
-    queries. The panel has three sections:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image61.png)
 
+    The **Data** panel opens. The sidebar has six panels. You use the **Data** panel to manage data from the semantic model, sheets, or queries. The panel has three sections:
     - **Semantic Model** - Lists the model tables **Measure Table**, **Dim
-      Countries**, **Dim Customers**, **Dim Date**, **Dim Regions**, **Dim
-      skus**, **Fact Plan Forecast**, **Fact Transactions**, and **P&L
-      Data**.
+    Countries**, **Dim Customers**, **Dim Date**, **Dim Regions**, **Dim skus**, **Fact Plan Forecast**, **Fact Transactions**, and **P&L Data**.
 
     - **From Sheets** - Lists data that comes from sheets.
-
     - **Queries** - Lists data that comes from queries.
 
-12. In the sidebar, select the **Fields** icon.
 
-    ![Screenshot](media/image62.png)
+1. In the sidebar, select the **Fields** icon.
 
-    The **Fields** panel opens. You use this panel to map dimensions and
-    measures to rows, columns, and values. The current sheet has the
-    following mapping:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image62.png)
 
+    The **Fields** panel opens. You use this panel to map dimensions and measures to rows, columns, and values. The current sheet has the following mapping:
     - **Rows** - **Region Name**, **Category**, and **Brand**. Select **+
-      Add Rows** to add more fields.
+    Add Rows** to add more fields.
 
     - **Columns** - **Date Hierarchy** with **Year**, **Quarter Name**,
-      and **Month Short Name**. Select **+ Add Columns** to add more
-      fields.
+    and **Month Short Name**. Select **+ Add Columns** to add more fields.
 
     - **Values** - **2025 Gross Revenue**.
 
-13. In the sidebar, select the **Filter** icon.
 
-    ![Screenshot](media/image63.png)
+1. In the sidebar, select the **Filter** icon.
 
-    The **Filter** panel opens. You use this panel to filter the data in
-    the sheet. The **Page level** section lists a filter card for each
-    field in the sheet. Each card is set to **is (All)**:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image63.png)
 
+    The **Filter** panel opens. You use this panel to filter the data in the sheet. The **Page level** section lists a filter card for each field in the sheet. Each card is set to **is (All)**:
     - **Region Name**
-
     - **Category**
-
     - **Brand**
-
     - **Year**
-
     - **Quarter Name**
-
     - **Month Short Name**
-
     - **2025 Gross Revenue**
 
-    You can drag more fields to **Add data fields here**. The **Global
-    level** section holds filters that apply beyond the current page.
+    You can drag more fields to **Add data fields here**. The **Global level** section holds filters that apply beyond the current page.
 
-14. In the sidebar, select the **Comments** icon.
 
-    ![Screenshot](media/image64.png)
+1. In the sidebar, select the **Comments** icon.
 
-    The **All Comments** panel opens. You use this panel to view and
-    manage comments on the sheet. The panel has the following controls:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image64.png)
 
+    The **All Comments** panel opens. You use this panel to view and manage comments on the sheet. The panel has the following controls:
     - **Search** - Finds comments by text.
-
     - Filter drop-down - Filters the list of comments.
 
-    The panel shows **No comments found** because no annotations exist
-    yet. After you add a comment, it appears in this panel.
+    The panel shows **No comments found** because no annotations exist yet. After you add a comment, it appears in this panel.
 
-15. In the sidebar, select the **Bookmark** icon.
 
-    ![Screenshot](media/image65.png)
+1. In the sidebar, select the **Bookmark** icon.
 
-    The **Bookmark** panel opens. You use this panel to manage bookmarks
-    on the **Public** and **Private** tabs. You can select **Add New** to
-    create a bookmark. The panel shows **No bookmarks available.** because
-    no bookmarks exist yet.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image65.png)
 
-16. In the sidebar, select the **Parameter** icon (**{x}**).
+    The **Bookmark** panel opens. You use this panel to manage bookmarks on the **Public** and **Private** tabs. You can select **Add New** to create a bookmark. The panel shows **No bookmarks available.** because no bookmarks exist yet.
 
-    ![Screenshot](media/image66.png)
+1. In the sidebar, select the **Parameter** icon (**{x}**).
 
-    The **Parameter** panel opens. You use this panel to add parameters on
-    the **Page Level** and **Global Level** tabs. You can select **+ Add
-    new** to create a parameter. The panel shows **No Parameters Found**
-    because no parameters exist yet.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image66.png)
 
-17. In the footer of the sheet, select **Rows: 125 Columns: 1**.
+    The **Parameter** panel opens. You use this panel to add parameters on the **Page Level** and **Global Level** tabs. You can select **+ Add new** to create a parameter. The panel shows **No Parameters Found** because no parameters exist yet.
 
-    ![Screenshot](media/image67.png)
+1. In the footer of the sheet, select **Rows: 125 Columns: 1**.
 
-    The statistics for the dimensions and measures in the sheet appear.
-    The sheet **2025 Gross Revenue by Region Name, Category, Brand, Year,
-    Quarter Name, Month Short Name** has 125 rows and 1 column. The footer
-    also shows **Session ready** and the **Sync** option.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image67.png)
 
-18. In the footer, use the zoom slider or the **−** and **+** icons to
-    adjust the canvas size.
+    The statistics for the dimensions and measures in the sheet appear. The sheet **2025 Gross Revenue by Region Name, Category, Brand, Year, Quarter Name, Month Short Name** has 125 rows and 1 column. The footer also shows **Session ready** and the **Sync** option.
 
-    The canvas zooms in or out, and the zoom box shows the current zoom
-    level, for example **100 %**.
+1. In the footer, use the zoom slider or the **−** and **+** icons to adjust the canvas size.
 
-19. In the footer, select the **Settings** icon.
+    The canvas zooms in or out, and the zoom box shows the current zoom level, for example **100 %**.
 
-    ![Screenshot](media/image68.png)
+1. In the footer, select the **Settings** icon.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image68.png)
 
     The **Settings** options for the sheet open.
 
-# Exercise 3: Top-down and bottom-up planning
 
-In this exercise, you set a top-down 2026 target, build a bottom-up 2026
-sales plan from prior-year actuals, and add inline comments and a
-**Status** column for row-level collaboration.
+## Exercise 3: Top-down and bottom-up planning
 
-## Task 1: Expand the column hierarchy and enable the column grand total
+In this exercise, you set a top-down 2026 target, build a bottom-up 2026 sales plan from prior-year actuals, and add inline comments and a **Status** column for row-level collaboration.
 
-In this task, you expand the **Year** column to show quarterly values
-and add a column grand total on the left of the sheet. Quarterly columns
-let you review and distribute the plan by period. The grand total shows
-the full-year value for each row.
+### Task 1: Expand the column hierarchy and enable the column grand total
 
-1.  On the **Plan Intro** sheet, in the **Year** column header, select
-    the expand icon (**\>**) next to **2025**.
+In this task, you expand the **Year** column to show quarterly values and add a column grand total on the left of the sheet. Quarterly columns let you review and distribute the plan by period. The grand total shows the full-year value for each row.
 
-    ![Screenshot](media/image69.png)
+1. On the **Plan Intro** sheet, in the **Year** column header, select the expand icon (**\>**) next to **2025**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image69.png)
 
     The **Year** column expands to show the quarters.
 
-2.  Review the **Quarter Name** row, which shows **Q1**, **Q2**, **Q3**,
-    and **Q4** under **2025**.
+1. Review the **Quarter Name** row, which shows **Q1**, **Q2**, **Q3**, and **Q4** under **2025**.
 
-    ![Screenshot](media/image70.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image70.png)
 
-    The sheet shows **2025 Gross Revenue** by quarter, for example
-    **4,473.63** for **All** in **Q1**.
+    The sheet shows **2025 Gross Revenue** by quarter, for example **4,473.63** for **All** in **Q1**.
 
-3.  On the ribbon, select the **Planning** tab.
+1. On the ribbon, select the **Planning** tab.
 
-4.  On the **Planning** tab, select **Totals**.
+1. On the **Planning** tab, select **Totals**.
 
-    The **Totals** menu opens with the **Row Grand Total**, **Column Grand
-    Total**, **Row Subtotal**, and **Column Subtotal** options.
+    The **Totals** menu opens with the **Row Grand Total**, **Column Grand Total**, **Row Subtotal**, and **Column Subtotal** options.
 
-5.  In the **Column Grand Total** list, which is set to **Off**, select
-    **Left**.
+1. In the **Column Grand Total** list, which is set to **Off**, select **Left**.
 
-    ![Screenshot](media/image71.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image71.png)
 
     A **Grand Total** column appears on the left of the quarterly columns.
 
-6.  Review the **Grand Total** column on the left of the sheet, which
-    shows the full-year **2025 Gross Revenue** values next to the
-    quarterly values.
+1. Review the **Grand Total** column on the left of the sheet, which shows the full-year **2025 Gross Revenue** values next to the quarterly values.
 
-    ![Screenshot](media/image72.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image72.png)
 
-    The **Grand Total** column shows the full-year 2025 actuals, for
-    example **17,888.87** for **All** and **2,152.03** for **APAC**.
+    The **Grand Total** column shows the full-year 2025 actuals, for example **17,888.87** for **All** and **2,152.03** for **APAC**.
 
-## Task 2: Insert the 2026 Target input column
 
-In this task, you create a **2026 Target** input series by copying the
-**2025 Gross Revenue** series. The new column starts with the 2025
-actuals. This gives Finance a baseline to adjust when setting the
-top-down revenue target.
+### Task 2: Insert the 2026 Target input column
 
-1.  On the **Planning** tab, select **Number** \> **Copy from another
-    series** \> **2025 Gross Revenue**.
+In this task, you create a **2026 Target** input series by copying the **2025 Gross Revenue** series. The new column starts with the 2025 actuals. This gives Finance a baseline to adjust when setting the top-down revenue target.
 
-    ![Screenshot](media/image73.png)
+1. On the **Planning** tab, select **Number** \> **Copy from another series** \> **2025 Gross Revenue**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image73.png)
 
     The **Data Input** pane opens.
 
-2.  In the **Title** field, enter the following value:
+1. In the **Title** field, enter the following value:
 
-    +++2026 Target+++
+    `2026 Target`
 
-    ![Screenshot](media/image74.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image74.png)
 
-3.  Verify that the following fields keep their default values:
+1. Verify that the following fields keep their default values:
 
     - Insert as - **Visual Measure**
+    - Input type - `Number`
+    - Column aggregation type - `Sum`
 
-    - Input type - **Number**
 
-    - Column aggregation type - **Sum**
+1. Select **Create**.
 
-4.  Select **Create**.
+    A **2026 Target** column appears next to each **2025 Gross Revenue** column.
 
-    A **2026 Target** column appears next to each **2025 Gross Revenue**
-    column.
+1. Review the **2026 Target** values under **Grand Total** and under each quarter (**Q1**, **Q2**, **Q3**, and **Q4**).
 
-5.  Review the **2026 Target** values under **Grand Total** and under
-    each quarter (**Q1**, **Q2**, **Q3**, and **Q4**).
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image75.png)
 
-    ![Screenshot](media/image75.png)
+    The **2026 Target** values match the **2025 Gross Revenue** values. For example, the **Grand Total** shows **17,888.87** for **All**, and **Q4** shows **4,466.25** for **All**.
 
-    The **2026 Target** values match the **2025 Gross Revenue** values.
-    For example, the **Grand Total** shows **17,888.87** for **All**, and
-    **Q4** shows **4,466.25** for **All**.
 
-## Task 3: Enter the top-level target
+### Task 3: Enter the top-level target
 
-In this task, you enter the full-year 2026 revenue target in the **Grand
-Total** cell of the **2026 Target** column. Plan distributes the value
-to every region, category, and brand based on the 2025 gross revenue
-mix. This gives Finance a top-down starting point.
+In this task, you enter the full-year 2026 revenue target in the **Grand Total** cell of the **2026 Target** column. Plan distributes the value to every region, category, and brand based on the 2025 gross revenue mix. This gives Finance a top-down starting point.
 
-1.  In the **Grand Total** column, double-click the **2026 Target** cell
-    in the **All** row.
+1. In the **Grand Total** column, double-click the **2026 Target** cell in the **All** row.
 
     The cell shows **17,888.87**, and the formula bar becomes active.
 
-2.  In the formula bar, enter the following value:
+1. In the formula bar, enter the following value:
 
-    +++18.5b+++
+    `18.5b`
 
     The formula bar shows **18,500,000,000** as a preview of the value.
 
-3.  Select the check mark icon to the right of the formula bar.
+1. Select the check mark icon to the right of the formula bar.
 
-    ![Screenshot](media/image76.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image76.png)
 
-    The **2026 Target** cell for **All** in the **Grand Total** column
-    shows **18,500.00**.
+    The **2026 Target** cell for **All** in the **Grand Total** column shows **18,500.00**.
 
-4.  Review the **2026 Target** values for the regions, brands, and
-    quarters.
+1. Review the **2026 Target** values for the regions, brands, and quarters.
 
-    ![Screenshot](media/image77.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image77.png)
 
-    The \$18.5B target is distributed proportionally to all regions,
-    categories, and brands based on the 2025 gross revenue mix. Regions
-    and brands with higher 2025 actuals receive a larger share of the
-    target. For example, **APAC** shows **2,225.55**, and **Q1** shows
-    **4,626.46** for **All**.
+    The \$18.5B target is distributed proportionally to all regions, categories, and brands based on the 2025 gross revenue mix. Regions and brands with higher 2025 actuals receive a larger share of the target. For example, **APAC** shows **2,225.55**, and **Q1** shows **4,626.46** for **All**.
 
-## Task 4: Apply an H2 skew
 
-In this task, you lock the **Q1** and **Q2** targets so that later
-changes to the full-year target flow only to the second half of the
-year. This lets Finance weight growth toward H2 without changing the
-first-half values.
+### Task 4: Apply an H2 skew
 
-1.  In the **Q1** column, select the **2026 Target** cell in the **All**
-    row.
+In this task, you lock the **Q1** and **Q2** targets so that later changes to the full-year target flow only to the second half of the year. This lets Finance weight growth toward H2 without changing the first-half values.
 
-    The cell shows **4,626.46**, and the distribution icon appears to the
-    right of the cell.
+1. In the **Q1** column, select the **2026 Target** cell in the **All** row.
 
-2.  Select the distribution icon next to the selected cell.
+    The cell shows **4,626.46**, and the distribution icon appears to the right of the cell.
+
+1. Select the distribution icon next to the selected cell.
 
     A menu opens with distribution and lock options.
 
-3.  Select **Lock all children**.
+1. Select **Lock all children**.
 
-    ![Screenshot](media/image78.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image78.png)
 
     The **Q1** **2026 Target** cell and all cells below it are locked.
 
-4.  In the **Q2** column, select the **2026 Target** cell in the **All**
-    row.
+1. In the **Q2** column, select the **2026 Target** cell in the **All** row.
 
     The cell shows **4,635.68**.
 
-5.  Select the distribution icon next to the selected cell.
+1. Select the distribution icon next to the selected cell.
 
-6.  Select **Lock all children**.
+1. Select **Lock all children**.
 
-    ![Screenshot](media/image79.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image79.png)
 
-    The **Q2** **2026 Target** cell and all cells below it are locked. The
-    locked **Q1** and **Q2** **2026 Target** columns appear shaded.
+    The **Q2** **2026 Target** cell and all cells below it are locked. The locked **Q1** and **Q2** **2026 Target** columns appear shaded.
 
-    **Note:** When you enter a new value in the **Grand Total** cell, Plan
-    skips the locked quarters. It distributes the value only to the
-    unlocked periods, **Q3** and **Q4**.
+    >[!Note] When you enter a new value in the **Grand Total** cell, Plan skips the locked quarters. It distributes the value only to the unlocked periods, **Q3** and **Q4**.
 
-7.  In the **Grand Total** column, select the **2026 Target** cell in
-    the **All** row.
+1. In the **Grand Total** column, select the **2026 Target** cell in the **All** row.
 
-    The cell shows **18,500.00**, and its value appears in the formula bar
-    above the grid.
+    The cell shows **18,500.00**, and its value appears in the formula bar above the grid.
 
-8.  In the formula bar, replace the current value with the following
-    value:
+1. In the formula bar, replace the current value with the following value:
 
-    +++18.75b+++
+    `18.75b`
 
-    ![Screenshot](media/image80.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image80.png)
 
     A preview below the formula bar shows **18,750,000,000**.
 
-9.  Press **Enter**, or select the check mark (**✓**) to the right of
-    the formula bar.
+1. Press **Enter**, or select the check mark (**✓**) to the right of the formula bar.
 
-    ![Screenshot](media/image81.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image81.png)
 
-    The **Grand Total** **2026 Target** cell in the **All** row shows
-    **18,750.00**. Plan distributes the additional \$0.25B only across
-    **Q3** and **Q4**. The locked **Q1** value stays at **4,626.46**, and
-    the locked **Q2** value stays at **4,635.68**.
+    The **Grand Total** **2026 Target** cell in the **All** row shows **18,750.00**. Plan distributes the additional \$0.25B only across **Q3** and **Q4**. The locked **Q1** value stays at **4,626.46**, and the locked **Q2** value stays at **4,635.68**.
 
-10. In the **Q1** column, select the **2026 Target** cell in the **All**
-    row.
+1. In the **Q1** column, select the **2026 Target** cell in the **All** row.
 
-    The cell shows **4,626.46**, and the distribution icon appears to the
-    right of the cell.
+    The cell shows **4,626.46**, and the distribution icon appears to the right of the cell.
 
-11. Select the distribution icon next to the selected cell.
+1. Select the distribution icon next to the selected cell.
 
-    A menu opens with the **Unlock this cell** and **Unlock all children**
-    options.
+    A menu opens with the **Unlock this cell** and **Unlock all children** options.
 
-12. Select **Unlock all children**.
+1. Select **Unlock all children**.
 
-    ![Screenshot](media/image82.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image82.png)
 
     The **Q1** **2026 Target** cell and all cells below it are unlocked.
 
-13. In the **Q2** column, select the **2026 Target** cell in the **All**
-    row.
+1. In the **Q2** column, select the **2026 Target** cell in the **All** row.
 
     The cell shows **4,635.68**.
 
-14. Select the distribution icon next to the selected cell.
+1. Select the distribution icon next to the selected cell.
 
-15. Select **Unlock all children**.
+1. Select **Unlock all children**.
 
-    ![Screenshot](media/image83.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image83.png)
 
-    The **Q2** **2026 Target** cell and all cells below it are unlocked,
-    and the **Q1** and **Q2** columns are no longer shaded. The **2026
-    Target** values in the **All** row keep the H2 skew. **Q1** shows
-    **4,626.46**, **Q2** shows **4,635.68**, **Q3** shows **4,744.03**,
-    and **Q4** shows **4,743.83**. The **Grand Total** **2026 Target**
-    cell in the **All** row remains **18,750.00**.
+    The **Q2** **2026 Target** cell and all cells below it are unlocked, and the **Q1** and **Q2** columns are no longer shaded. The **2026 Target** values in the **All** row keep the H2 skew. **Q1** shows **4,626.46**, **Q2** shows **4,635.68**, **Q3** shows **4,744.03**, and **Q4** shows **4,743.83**. The **Grand Total** **2026 Target** cell in the **All** row remains **18,750.00**.
 
-    **Note:** In practice, teams typically do top-down and bottom-up
-    planning on separate sheets at different levels of granularity.
-    Finance works from the total down, and Sales builds from the detail
-    up. This lab shows both on the same sheet to keep the setup focused on
-    the mechanics.
+    >[!Note] In practice, teams typically do top-down and bottom-up planning on separate sheets at different levels of granularity. Finance works from the total down, and Sales builds from the detail up. This lab shows both on the same sheet to keep the setup focused on the mechanics.
 
-## Task 5: Insert the 2026 Sales Plan input column
 
-In this task, you create a **2026 Sales Plan** input column by copying
-the **2025 Gross Revenue** series. This column gives Sales a bottom-up
-starting point that is pre-populated with 2025 actuals. You adjust these
-values in later tasks.
+### Task 5: Insert the 2026 Sales Plan input column
 
-1.  On the **Planning** tab, in the **Rows & Columns** group, select
-    **Number**.
+In this task, you create a **2026 Sales Plan** input column by copying the **2025 Gross Revenue** series. This column gives Sales a bottom-up starting point that is pre-populated with 2025 actuals. You adjust these values in later tasks.
 
-    A menu opens with the **Insert a new empty series** and **Copy from
-    another series** options.
+1. On the **Planning** tab, in the **Rows & Columns** group, select **Number**.
 
-2.  Select **Copy from another series** \> **2025 Gross Revenue**.
+    A menu opens with the **Insert a new empty series** and **Copy from another series** options.
 
-    ![Screenshot](media/image84.png)
+1. Select **Copy from another series** \> **2025 Gross Revenue**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image84.png)
 
     The **Data Input** pane opens on the right side of the sheet.
 
-3.  In the **Title** field, enter the following value:
+1. In the **Title** field, enter the following value:
 
-    +++2026 Sales Plan+++
+    `2026 Sales Plan`
 
-4.  Confirm that the remaining fields in the **Data Input** pane are set
-    as follows:
+1. Confirm that the remaining fields in the **Data Input** pane are set as follows:
 
     - Insert as - **Visual Measure**
-
-    - Input type - **Number**
-
-    - Column aggregation type - **Sum**
-
-    - Row aggregation type - **Sum**
-
+    - Input type - `Number`
+    - Column aggregation type - `Sum`
+    - Row aggregation type - `Sum`
     - Distribute parent value to children - selected
 
-5.  Select **Create**.
 
-    ![Screenshot](media/image85.png)
+1. Select **Create**.
 
-    The **2026 Sales Plan** column appears next to **2026 Target** in each
-    period. The column is pre-populated with the 2025 values. For example,
-    the **Grand Total** **2026 Sales Plan** cell in the **All** row shows
-    **17,888.87**, and the **Q1** cell in the **All** row shows
-    **4,473.63**. The counter on **Manage measures** on the ribbon changes
-    to **2**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image85.png)
 
-    ![Screenshot](media/image86.png)
+    The **2026 Sales Plan** column appears next to **2026 Target** in each period. The column is pre-populated with the 2025 values. For example, the **Grand Total** **2026 Sales Plan** cell in the **All** row shows **17,888.87**, and the **Q1** cell in the **All** row shows **4,473.63**. The counter on **Manage measures** on the ribbon changes to **2**.
 
-## Task 6: Adjust the Summit Lager plan in North America
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image86.png)
 
-In this task, you show all rows on one page and collapse the row
-hierarchy to the region level. You then raise the **2026 Sales Plan**
-value for **Summit Lager** in North America and distribute it across the
-quarters with a growth trend. This shows how one change at the top level
-rolls up through the hierarchy and spreads to the quarterly values.
 
-1.  In the status bar in the lower-right corner of the sheet, select the
-    **Settings** (gear) icon.
+### Task 6: Adjust the Summit Lager plan in North America
 
-    The **Settings** pane opens with the **Panel Aggregation** and **Rows
-    Per Page** fields.
+In this task, you show all rows on one page and collapse the row hierarchy to the region level. You then raise the **2026 Sales Plan** value for **Summit Lager** in North America and distribute it across the quarters with a growth trend. This shows how one change at the top level rolls up through the hierarchy and spreads to the quarterly values.
 
-2.  Select the **Rows Per Page** list, which is set to **Auto**.
+1. In the status bar in the lower-right corner of the sheet, select the **Settings** (gear) icon.
 
-3.  Select **All**.
+    The **Settings** pane opens with the **Panel Aggregation** and **Rows Per Page** fields.
 
-    ![Screenshot](media/image87.png)
+1. Select the **Rows Per Page** list, which is set to **Auto**.
+
+1. Select **All**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image87.png)
 
     All rows of the sheet appear on a single page.
 
-4.  Point to the **APAC** row, and then select the row gripper icon that
-    appears to the left of it.
+1. Point to the **APAC** row, and then select the row gripper icon that appears to the left of it.
 
-    A menu opens with the **Select**, **Expand**, **Collapse**,
-    **Insert**, **Actions**, and **Audit** options.
+    A menu opens with the **Select**, **Expand**, **Collapse**, **Insert**, **Actions**, and **Audit** options.
 
-5.  Select **Collapse** \> **Specific Level** \> **Region Name**.
+1. Select **Collapse** \> **Specific Level** \> **Region Name**.
 
-    ![Screenshot](media/image88.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image88.png)
 
-    The row hierarchy collapses to the region level. The sheet shows only
-    the **All**, **APAC**, **EU**, **LA**, and **NA** rows.
+    The row hierarchy collapses to the region level. The sheet shows only the **All**, **APAC**, **EU**, **LA**, and **NA** rows.
 
-    ![Screenshot](media/image89.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image89.png)
 
-6.  Select the expand icon (**⊞**) next to **NA**.
+1. Select the expand icon (**⊞**) next to **NA**.
 
-    The **NA** row expands and shows the **Beer**, **Hard Seltzer**, and
-    **Non-Alcoholic** category rows.
+    The **NA** row expands and shows the **Beer**, **Hard Seltzer**, and **Non-Alcoholic** category rows.
 
-    **Note:** The category rows appear under **NA** when **Category** is
-    above **Brand** in the **Rows** well of the **Fields** pane. In that
-    case, the sheet title reads **...by Region Name, Category, Brand...**.
-    If brands appear under **NA** instead, check the order of the fields
-    in the **Rows** well.
+    >[!Note] The category rows appear under **NA** when **Category** is above **Brand** in the **Rows** well of the **Fields** pane. In that case, the sheet title reads **...by Region Name, Category, Brand...**. If brands appear under **NA** instead, check the order of the fields in the **Rows** well.
 
-7.  Select the expand icon (**⊞**) next to **Beer**.
+1. Select the expand icon (**⊞**) next to **Beer**.
 
-    The **Beer** row expands and shows its brand rows, including **Artisan
-    Ale**, **Cosmic Craft**, **Eclipse Light**, **Old Mill**,
-    **Riverbend**, and **Summit Lager**. In the **Grand Total** columns,
-    the **Summit Lager** row shows **4,395.74** for **2025 Gross Revenue**
-    and **4,607.33** for **2026 Target**.
+    The **Beer** row expands and shows its brand rows, including **Artisan Ale**, **Cosmic Craft**, **Eclipse Light**, **Old Mill**, **Riverbend**, and **Summit Lager**. In the **Grand Total** columns, the **Summit Lager** row shows **4,395.74** for **2025 Gross Revenue** and **4,607.33** for **2026 Target**.
 
-    ![Screenshot](media/image90.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image90.png)
 
-8.  In the **Summit Lager** row, double-click the **Grand Total** cell
-    in the **2026 Sales Plan** column.
+1. In the **Summit Lager** row, double-click the **Grand Total** cell in the **2026 Sales Plan** column.
 
-    The cell switches to edit mode. Before the change, the cell shows
-    **4,395.74**. The formula bar shows the existing value
-    **4395741014.28001**.
+    The cell switches to edit mode. Before the change, the cell shows **4,395.74**. The formula bar shows the existing value **4395741014.28001**.
 
-9.  In the formula bar, place the cursor at the end of the existing
-    value.
+1. In the formula bar, place the cursor at the end of the existing value.
 
-10. Type **+8%** (a plus sign followed by 8%), so that the formula bar
-    shows the existing value followed by **+8%**.
+1. Type **+8%** (a plus sign followed by 8%), so that the formula bar shows the existing value followed by **+8%**.
 
-    ![Screenshot](media/image91.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image91.png)
 
-    A preview below the formula bar shows the new value
-    **4,747,400,295.422**.
+    A preview below the formula bar shows the new value **4,747,400,295.422**.
 
-11. Press **Enter**.
+1. Press **Enter**.
 
-    ![Screenshot](media/image92.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image92.png)
 
-    The **Values saved** notification appears. In the **Summit Lager**
-    row, the **Grand Total** for **2026 Sales Plan** changes to
-    **4,747.40**. The change rolls up through the hierarchy:
-
+    The **Values saved** notification appears. In the **Summit Lager** row, the **Grand Total** for **2026 Sales Plan** changes to **4,747.40**. The change rolls up through the hierarchy:
     - **Beer** changes to **8,386.03**.
-
     - **NA** changes to **9,572.22**.
-
     - **All** changes to **18,240.53**.
 
-12. In the **Summit Lager** row, select the **Grand Total** cell in the
-    **2026 Sales Plan** column.
+
+1. In the **Summit Lager** row, select the **Grand Total** cell in the **2026 Sales Plan** column.
 
     The distribution icon appears next to the cell.
 
-13. Select the distribution icon (**⌄**) next to the cell.
+1. Select the distribution icon (**⌄**) next to the cell.
 
     A menu opens with the following options:
-
     - **Distribute equally**
-
     - **Distribute to column with trend**
-
     - **Distribute to columns by weights of 2025 Gross Revenue**
-
     - **Distribute to columns by weights of 2026 Target**
-
     - **Distribute to columns by weights of 2026 Sales Plan**
-
     - **Lock this cell**
-
     - **Lock all children**
 
-14. Select **Distribute to column with trend**.
+
+1. Select **Distribute to column with trend**.
 
     A slider and the **Input custom value** option appear.
 
-15. Drag the slider to **4%**.
+1. Drag the slider to **4%**.
 
-    ![Screenshot](media/image93.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image93.png)
 
-    The adjusted annual total of **4,747.40** is distributed across the
-    quarters with a 4% growth trend.
+    The adjusted annual total of **4,747.40** is distributed across the quarters with a 4% growth trend.
 
-16. Scroll right to review the quarterly **2026 Sales Plan** values in
-    the **Summit Lager** row.
+1. Scroll right to review the quarterly **2026 Sales Plan** values in the **Summit Lager** row.
 
-    ![Screenshot](media/image94.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image94.png)
 
     The quarterly values increase from quarter to quarter:
-
     - **Q1** - **986.27**
-
     - **Q2** - **1,109.42**
-
     - **Q3** - **1,247.94**
-
     - **Q4** - **1,403.77**
 
-    **Q1** receives the smallest share of the annual total, and **Q4**
-    receives the largest.
+    **Q1** receives the smallest share of the annual total, and **Q4** receives the largest.
 
-## Task 7: Apply a summer Q3 uplift across key markets
 
-In this task, you use **Bulk Edit** to apply an 8% uplift to the **2026
-Sales Plan** for Beer and Hard Seltzer in the EU and Latin America
-during Q3. This applies the summer promotion to the whole segment in one
-action, so you don't need to edit each cell.
+### Task 7: Apply a summer Q3 uplift across key markets
 
-1.  On the ribbon, select **Planning** \> **Bulk Edit**.
+In this task, you use **Bulk Edit** to apply an 8% uplift to the **2026 Sales Plan** for Beer and Hard Seltzer in the EU and Latin America during Q3. This applies the summer promotion to the whole segment in one action, so you don't need to edit each cell.
 
-    ![Screenshot](media/image95.png)
+1. On the ribbon, select **Planning** \> **Bulk Edit**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image95.png)
 
     The **Bulk Edit** dialog opens.
 
-2.  In the **Measure** list, select **2026 Sales Plan**.
+1. In the **Measure** list, select **2026 Sales Plan**.
 
-3.  Under **Select Filter**, add the following filters by selecting **+
-    Add Filter** for each one:
+1. Under **Select Filter**, add the following filters by selecting **+ Add Filter** for each one:
 
-    - Region Name - **Is** - **EU**, **LA**
-
+    - Region Name - `Is` - **EU**, **LA**
     - Category - **Is** - **Beer**, **Hard Seltzer**
+    - Quarter Name - `Is` - **Q3**
 
-    - Quarter Name - **Is** - **Q3**
 
-4.  Enter the following details for the remaining fields:
+1. Enter the following details for the remaining fields:
 
     - Apply to Row Level - **Brand**
-
     - Apply to Column Level - **Month Short Name**
-
     - Type - **Append By**
-
-    - Value - +++8%+++
-
+    - Value - `8%`
     - Distribution - **Distribute by weights of 2026 Sales Plan**
 
-    ![Screenshot](media/image96.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image96.png)
 
-    **Note:** The **Distribution** field defaults to **Distribute by
-    weights of 2026 Sales Plan**.
+    >[!Note] The **Distribution** field defaults to **Distribute by weights of 2026 Sales Plan**.
 
-5.  Select **Apply**.
 
-    ![Screenshot](media/image97.png)
+1. Select **Apply**.
 
-    The **Values saved** notification appears, and the updated cells are
-    highlighted. The **2026 Sales Plan** totals change as follows:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image97.png)
 
+    The **Values saved** notification appears, and the updated cells are highlighted. The **2026 Sales Plan** totals change as follows:
     - **All** - **18,362.79**
-
     - **EU** - **4,539.45**
-
     - **LA** - **2,099.09**
 
-6.  Review the **Q3** values in the **2026 Sales Plan** column for
-    **EU** and **LA**.
 
-    ![Screenshot](media/image98.png)
+1. Review the **Q3** values in the **2026 Sales Plan** column for **EU** and **LA**.
 
-    The **Q3** **2026 Sales Plan** value for **EU** is **1,195.33**, and
-    the value for **LA** is **551.20**. The **Q3** total for **All** is
-    **4,747.00**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image98.png)
 
-7.  Verify that the **Q3** **2026 Sales Plan** values for **Beer** and
-    **Hard Seltzer** in **EU** and **LA** increased by 8%, and that the
-    rest of the plan is unchanged.
+    The **Q3** **2026 Sales Plan** value for **EU** is **1,195.33**, and the value for **LA** is **551.20**. The **Q3** total for **All** is **4,747.00**.
 
-    ![Screenshot](media/image99.png)
+1. Verify that the **Q3** **2026 Sales Plan** values for **Beer** and **Hard Seltzer** in **EU** and **LA** increased by 8%, and that the rest of the plan is unchanged.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image99.png)
 
     The highlighted cells show the updated values:
-
     - **All** **Grand Total** - **18,362.79**
-
     - **EU** **Grand Total** - **4,539.45**
-
     - **LA** **Grand Total** - **2,099.09**
-
     - **All** **Q3** total - **4,747.00**
-
     - **EU** **Q3** - **1,195.33**
-
     - **LA** **Q3** - **551.20**
 
     The values for **APAC** and **NA** don't change.
 
-## Task 8: Add inline comments
 
-In this task, you add an inline comment to the Summit Lager plan value
-to record why the number changed. Inline comments keep the reasoning
-behind plan changes next to the data, so reviewers and approvers can
-understand each adjustment.
+### Task 8: Add inline comments
 
-1.  In the grid, under **NA** \> **Beer**, select the **Grand Total**
-    cell in the **2026 Sales Plan** column for **Summit Lager**
-    (**4,747.40**).
+In this task, you add an inline comment to the Summit Lager plan value to record why the number changed. Inline comments keep the reasoning behind plan changes next to the data, so reviewers and approvers can understand each adjustment.
 
-2.  On the toolbar in the upper-right corner, select **Comments**.
+1. In the grid, under **NA** \> **Beer**, select the **Grand Total** cell in the **2026 Sales Plan** column for **Summit Lager** (**4,747.40**).
 
-    ![Screenshot](media/image100.png)
+1. On the toolbar in the upper-right corner, select **Comments**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image100.png)
 
     A comment box opens next to the selected cell.
 
-3.  In the comment text box, enter the following text:
+1. In the comment text box, enter the following text:
 
-    +++8% uplift agreed with the NA sales lead. Annual total distributed
-    across quarters with a 4% growth trend+++
+    `8% uplift agreed with the NA sales lead. Annual total distributed across quarters with a 4% growth trend`
 
-4.  Select the **Send** (arrow) icon.
+1. Select the **Send** (arrow) icon.
 
-    ![Screenshot](media/image101.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image101.png)
 
-    The **Comment added** notification appears. The **Summit Lager** cell
-    shows a green comment indicator in its corner.
+    The **Comment added** notification appears. The **Summit Lager** cell shows a green comment indicator in its corner.
 
-5.  Select the comment indicator on the **Summit Lager** **2026 Sales
-    Plan** cell.
+1. Select the comment indicator on the **Summit Lager** **2026 Sales Plan** cell.
 
-    ![Screenshot](media/image102.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image102.png)
 
-    The comment opens and shows your comment text, the date and time that
-    you added it, and a **Reply** box.
+    The comment opens and shows your comment text, the date and time that you added it, and a **Reply** box.
 
-    **Note:** The comment card shows the author, the date and time, and
-    the comment text. Use the **Reply** box to reply to the comment. Use
-    the **Edit** (pencil) and **Delete** (trash) icons to change or remove
-    the comment.
+    >[!Note] The comment card shows the author, the date and time, and the comment text. Use the **Reply** box to reply to the comment. Use the **Edit** (pencil) and **Delete** (trash) icons to change or remove the comment.
 
-6.  In the comment card, select the **More options** (**...**) icon.
+1. In the comment card, select the **More options** (**...**) icon.
 
-    ![Screenshot](media/image103.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image103.png)
 
-    A menu opens with the **Resolve Thread** and **Lock Thread** actions.
-    The menu also has a **Sort by** section with the **Newest to Oldest**
-    and **Oldest to Newest** options. Use these options to close a
-    discussion, prevent further replies, or change the order of replies in
-    the thread.
+    A menu opens with the **Resolve Thread** and **Lock Thread** actions. The menu also has a **Sort by** section with the **Newest to Oldest** and **Oldest to Newest** options. Use these options to close a discussion, prevent further replies, or change the order of replies in the thread.
 
-## Task 9: Enable the comments column
 
-In this task, you turn on the **Comments** column so that comments
-appear in a dedicated column in the grid. Reviewers can then read the
-reasoning for each row next to the plan numbers without opening each
-comment indicator.
+### Task 9: Enable the comments column
 
-1.  On the toolbar in the upper-right corner, select the arrow next to
-    **Comments**.
+In this task, you turn on the **Comments** column so that comments appear in a dedicated column in the grid. Reviewers can then read the reasoning for each row next to the plan numbers without opening each comment indicator.
 
-2.  Select **Settings**.
+1. On the toolbar in the upper-right corner, select the arrow next to **Comments**.
 
-    ![Screenshot](media/image104.png)
+1. Select **Settings**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image104.png)
 
     The **Comment Settings** dialog opens.
 
-3.  Under **Comments Column**, set the toggle to **Show**.
+1. Under **Comments Column**, set the toggle to `Show`.
 
-    ![Screenshot](media/image105.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image105.png)
 
-    **Note:** Leave the other settings at their current values. For
-    example, leave **Enable Commenting** set to **On** and **Teams
-    Notification** set to **On**.
+    >[!Note] Leave the other settings at their current values. For example, leave **Enable Commenting** set to **On** and **Teams Notification** set to **On**.
 
-4.  Select **Save**.
+1. Select **Save**.
 
-    ![Screenshot](media/image106.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image106.png)
 
-    The **Comment Settings** dialog closes. A **Comments** column appears
-    on the right side of the grid.
+    The **Comment Settings** dialog closes. A **Comments** column appears on the right side of the grid.
 
-5.  In the **Comments** column, double-click the cell for the **NA**
-    row.
+1. In the **Comments** column, double-click the cell for the **NA** row.
 
-    A comment card opens with an **Assign to user** option and a comment
-    text box.
+    A comment card opens with an **Assign to user** option and a comment text box.
 
-6.  In the comment text box, enter the following text:
+1. In the comment text box, enter the following text:
 
-    +++Sales Plan reviewed and ready for submission+++
+    `Sales Plan reviewed and ready for submission`
 
-7.  In the same text box, enter the following character to tag another
-    user:
+1. In the same text box, enter the following character to tag another user:
 
-    +++@+++
+    `@`
 
     A list of users appears.
 
-8.  In the list, select the user to tag, for example
-    **Accounting-User-\<ID\>**.
+1. In the list, select the user to tag, for example **Accounting-User-*{ID}***.
 
     The tagged user's name appears as a link in the comment text.
 
-9.  In the lower-right corner of the comment card, select **Post** (send
-    arrow).
+1. In the lower-right corner of the comment card, select **Post** (send arrow).
 
-    ![Screenshot](media/image107.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image107.png)
 
-    A **Comment added successfully** notification appears in the
-    upper-right corner. The comment appears in the **Comments** column for
-    the **NA** row. The comment card shows your user name, the date and
-    time, the comment text, and the tagged user.
+    A **Comment added successfully** notification appears in the upper-right corner. The comment appears in the **Comments** column for the **NA** row. The comment card shows your user name, the date and time, the comment text, and the tagged user.
 
-    ![Screenshot](media/image108.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image108.png)
 
-## Task 10: Add a status column
 
-In this task, you collapse the column hierarchy and add a **Status**
-list column to the grid. Collaboration columns let reviewers record
-structured inputs, such as a status, next to the plan numbers for each
-row.
+### Task 10: Add a status column
 
-1.  In the column header area, select the collapse arrow (**˅**) next to
-    **2025** in the **Year** row.
+In this task, you collapse the column hierarchy and add a **Status** list column to the grid. Collaboration columns let reviewers record structured inputs, such as a status, next to the plan numbers for each row.
 
-    ![Screenshot](media/image109.png)
+1. In the column header area, select the collapse arrow (**˅**) next to **2025** in the **Year** row.
 
-    The quarter columns collapse, and the grid shows the year-level
-    totals.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image109.png)
 
-2.  On the **Planning** tab, in the **Rows & Columns** group, select
-    **List** \> **Single Select**.
+    The quarter columns collapse, and the grid shows the year-level totals.
 
-    ![Screenshot](media/image110.png)
+1. On the **Planning** tab, in the **Rows & Columns** group, select **List** \> **Single Select**.
 
-3.  In the **Data Input** pane, in the **Title** field, enter the
-    following value:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image110.png)
 
-    +++Status+++
+1. In the **Data Input** pane, in the **Title** field, enter the following value:
 
-    **Insert as** remains set to **Visual Column**, and **Input type**
-    remains set to **Single Select**.
+    `Status`
 
-4.  Under **Options**, select **Presets**.
+    **Insert as** remains set to **Visual Column**, and **Input type** remains set to **Single Select**.
 
-    ![Screenshot](media/image111.png)
+1. Under **Options**, select **Presets**.
 
-    The **Add options from Preset** dialog opens. It lists preset option
-    sets, such as **Yes/No**, **Up/Down**, **Open/Closed**, **Project
-    Status**, **Approval Status**, and **Process Status**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image111.png)
 
-5.  In the **Add options from Preset** dialog, select **Process
-    Status**.
+    The **Add options from Preset** dialog opens. It lists preset option sets, such as **Yes/No**, **Up/Down**, **Open/Closed**, **Project Status**, **Approval Status**, and **Process Status**.
 
-6.  Select **Apply**.
+1. In the **Add options from Preset** dialog, select **Process Status**.
 
-    ![Screenshot](media/image112.png)
+1. Select **Apply**.
 
-    The dialog closes. Under **Options**, the **Data Input** pane lists
-    the preset values **Not Started**, **Started**, **In Progress**, **In
-    Review**, and **Completed**. Each value has its own color.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image112.png)
 
-7.  Select **Create**.
+    The dialog closes. Under **Options**, the **Data Input** pane lists the preset values **Not Started**, **Started**, **In Progress**, **In Review**, and **Completed**. Each value has its own color.
 
-    ![Screenshot](media/image113.png)
+1. Select **Create**.
 
-    A **Measure created successfully** notification appears in the
-    upper-right corner. The new **Status** column appears in the grid, to
-    the left of the **Comments** column.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image113.png)
 
-    ![Screenshot](media/image114.png)
+    A **Measure created successfully** notification appears in the upper-right corner. The new **Status** column appears in the grid, to the left of the **Comments** column.
 
-8.  In the grid, in the **NA** row, select the **Status** cell.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image114.png)
 
-    ![Screenshot](media/image115.png)
+1. In the grid, in the **NA** row, select the **Status** cell.
 
-    A list opens. It contains a **Search for an option** box and the
-    options **Not Started**, **Started**, **In Progress**, **In Review**,
-    and **Completed**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image115.png)
 
-9.  In the list, select **In Progress**.
+    A list opens. It contains a **Search for an option** box and the options **Not Started**, **Started**, **In Progress**, **In Review**, and **Completed**.
 
-    ![Screenshot](media/image116.png)
+1. In the list, select **In Progress**.
 
-    The **Status** cell in the **NA** row shows **In Progress** with a
-    yellow highlight.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image116.png)
 
-10. In the upper-right corner of the ribbon, select **Save**.
+    The **Status** cell in the **NA** row shows **In Progress** with a yellow highlight.
 
-    ![Screenshot](media/image117.png)
+1. In the upper-right corner of the ribbon, select **Save**.
 
-    A **Report saved successfully!** notification appears in the
-    upper-right corner.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image117.png)
 
-    ![Screenshot](media/image118.png)
+    A **Report saved successfully!** notification appears in the upper-right corner.
 
-# Exercise 4: Optimizer
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image118.png)
 
-In this exercise, you combine the 2026 Sales Plan with 2025 COGS in a
-planning sheet and use the Optimizer to reach a \$12.5B gross profit
-target.
 
-## Task 1: Set up the Gross Profit sheet
+## Exercise 4: Optimizer
 
-In this task, you create a planning sheet named Gross Profit and assign
-its rows, columns, and values. This sheet brings revenue and cost data
-together so that the Optimizer can calculate gross profit by region,
-category, and brand.
+In this exercise, you combine the 2026 Sales Plan with 2025 COGS in a planning sheet and use the Optimizer to reach a \$12.5B gross profit target.
 
-1.  On the **Home** tab, in the **Create** group, select **New Planning
-    Sheet**.
+### Task 1: Set up the Gross Profit sheet
 
-    ![Screenshot](media/image119.png)
+In this task, you create a planning sheet named Gross Profit and assign its rows, columns, and values. This sheet brings revenue and cost data together so that the Optimizer can calculate gross profit by region, category, and brand.
+
+1. On the **Home** tab, in the **Create** group, select **New Planning Sheet**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image119.png)
 
     The **New Planning Sheet** dialog opens.
 
-2.  In the **Name** field, enter the following value:
+1. In the **Name** field, enter the following value:
 
-    +++Gross Profit+++
+    `Gross Profit`
 
-    ![Screenshot](media/image120.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image120.png)
 
-3.  Select **Create**.
+1. Select **Create**.
 
-    The new **Gross Profit** sheet opens with the **Fields** and **Data**
-    panes on the right.
+    The new **Gross Profit** sheet opens with the **Fields** and **Data** panes on the right.
 
-4.  In the **Data** pane, under **Semantic Model** \> **Dim Regions**,
-    select the **Region Name** check box.
+1. In the **Data** pane, under **Semantic Model** \> **Dim Regions**, select the **Region Name** check box.
 
     **Region Name** appears in the **Rows** well of the **Fields** pane.
 
-5.  Under **Semantic Model** \> **Dim skus**, select the **Category**
-    check box.
+1. Under **Semantic Model** \> **Dim skus**, select the **Category** check box.
 
-6.  Under **Semantic Model** \> **Dim skus**, select the **Brand** check
-    box.
+1. Under **Semantic Model** \> **Dim skus**, select the **Brand** check box.
 
-    ![Screenshot](media/image121.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image121.png)
 
-    **Category** and **Brand** appear in the **Rows** well under **Region
-    Name**.
+    **Category** and **Brand** appear in the **Rows** well under **Region Name**.
 
-    **Note:** The rows must be in the order **Region Name**, **Category**,
-    **Brand**. If **Brand** appears above **Category** in the **Rows**
-    well, drag **Category** above **Brand**.
+    >[!Note] The rows must be in the order **Region Name**, **Category**, **Brand**. If **Brand** appears above **Category** in the **Rows** well, drag **Category** above **Brand**.
 
-7.  Under **Semantic Model** \> **Dim Date**, select the **Date
-    Hierarchy** check box.
+1. Under **Semantic Model** \> **Dim Date**, select the **Date Hierarchy** check box.
 
-    **Date Hierarchy** appears in the **Columns** well with the levels
-    **Year**, **Quarter Name**, and **Month Short Name**.
+    **Date Hierarchy** appears in the **Columns** well with the levels **Year**, **Quarter Name**, and **Month Short Name**.
 
-8.  In the **Data** pane, under **From Sheets** \> **Plan Intro**,
-    select the **2026 Sales Plan** check box.
+1. In the **Data** pane, under **From Sheets** \> **Plan Intro**, select the **2026 Sales Plan** check box.
 
     **Sum of 2026 Sales Plan** appears in the **Values** well.
 
-9.  Under **Semantic Model** \> **Measure Table** \> **Cost &
-    Discounts**, select the **2025 COGS** check box.
+1. Under **Semantic Model** \> **Measure Table** \> **Cost & Discounts**, select the **2025 COGS** check box.
 
-    ![Screenshot](media/image122.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image122.png)
 
-    **2025 COGS** appears in the **Values** well under **Sum of 2026 Sales
-    Plan**.
+    **2025 COGS** appears in the **Values** well under **Sum of 2026 Sales Plan**.
 
-10. In the **Values** well, double-click the **Sum of 2026 Sales Plan**
-    label.
+1. In the **Values** well, double-click the **Sum of 2026 Sales Plan** label.
 
     The label becomes editable.
 
-11. Enter the following name:
+1. Enter the following name:
 
-    +++2026 Sales Plan+++
+    `2026 Sales Plan`
 
     The label in the **Values** well changes to **2026 Sales Plan**.
 
-12. In the **Data** pane, verify that the following check boxes are
-    selected:
+1. In the **Data** pane, verify that the following check boxes are selected:
 
     - **Semantic Model** \> **Measure Table** \> **Cost & Discounts** \>
-      **2025 COGS**
+    **2025 COGS**
 
     - **From Sheets** \> **Plan Intro** \> **2026 Sales Plan**
 
-    ![Screenshot](media/image123.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image123.png)
 
     Both fields appear in the **Values** well.
 
-13. In the **Values** well, drag **2025 COGS** above the **2026 Sales
-    Plan** field.
 
-    ![Screenshot](media/image124.png)
+1. In the **Values** well, drag **2025 COGS** above the **2026 Sales Plan** field.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image124.png)
 
     **2025 COGS** moves to the first position in the **Values** well.
 
-14. Verify that the **Values** well shows **2025 COGS** first and **2026
-    Sales Plan** second.
+1. Verify that the **Values** well shows **2025 COGS** first and **2026 Sales Plan** second.
 
-    ![Screenshot](media/image125.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image125.png)
 
-    **Note:** If the label still reads **Sum of 2026 Sales Plan**, repeat
-    steps 10 and 11 to rename it to **2026 Sales Plan**.
+    >[!Note] If the label still reads **Sum of 2026 Sales Plan**, repeat steps 10 and 11 to rename it to **2026 Sales Plan**.
 
-## Task 2: Create data input columns for the Optimizer
 
-In this task, you create editable data input columns by copying the
-existing **2026 Sales Plan** and **2025 COGS** series. The Optimizer
-adjusts these input columns to calculate the revenue growth and cost
-reduction needed to reach the gross profit goal.
+### Task 2: Create data input columns for the Optimizer
 
-1.  On the **Planning** tab, select **Number** \> **Copy from another
-    series** \> **2026 Sales Plan**.
+In this task, you create editable data input columns by copying the existing **2026 Sales Plan** and **2025 COGS** series. The Optimizer adjusts these input columns to calculate the revenue growth and cost reduction needed to reach the gross profit goal.
 
-    ![Screenshot](media/image126.png)
+1. On the **Planning** tab, select **Number** \> **Copy from another series** \> **2026 Sales Plan**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image126.png)
 
     The **Save changes to proceed** dialog box opens.
 
-2.  In the **Save changes to proceed** dialog, select **Save and
-    continue**.
+1. In the **Save changes to proceed** dialog, select **Save and continue**.
 
-    ![Screenshot](media/image127.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image127.png)
 
     The changes are saved, and the **Data Input** pane opens.
 
-3.  In the **Data Input** pane, in the **Title** field, enter the
-    following value:
+1. In the **Data Input** pane, in the **Title** field, enter the following value:
 
-    +++Sales Plan+++
+    `Sales Plan`
 
-    ![Screenshot](media/image128.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image128.png)
 
-4.  Verify that the **Data Input** pane shows the following settings:
-
-    - Insert as - **Visual Measure**
-
-    - Input type - **Number**
-
-    - Column aggregation type - **Sum**
-
-    - Row aggregation type - **Sum**
-
-    - Distribute parent value to children - **Selected**
-
-5.  Select **Create**.
-
-    The **Sales Plan** column is added to the table. It shows the same
-    values as **2026 Sales Plan**, for example **18,362.79** for **All**.
-
-6.  On the **Planning** tab, select **Number** \> **Copy from another
-    series** \> **2025 COGS**.
-
-    ![Screenshot](media/image129.png)
-
-7.  In the **Data Input** pane, in the **Title** field, enter the
-    following value:
-
-    +++COGS+++
-
-    ![Screenshot](media/image130.png)
-
-8.  Verify that the **Data Input** pane shows the following settings:
+1. Verify that the **Data Input** pane shows the following settings:
 
     - Insert as - **Visual Measure**
-
-    - Input type - **Number**
-
-    - Column aggregation type - **Sum**
-
-    - Row aggregation type - **Sum**
-
+    - Input type - `Number`
+    - Column aggregation type - `Sum`
+    - Row aggregation type - `Sum`
     - Distribute parent value to children - **Selected**
 
-9.  Select **Create**.
 
-    ![Screenshot](media/image131.png)
+1. Select **Create**.
 
-    The **COGS** column is added to the table. It shows the same values as
-    **2025 COGS**, for example **7,543.23** for **All**.
+    The **Sales Plan** column is added to the table. It shows the same values as **2026 Sales Plan**, for example **18,362.79** for **All**.
 
-    **Note:** The **Sales Plan** and **COGS** columns are editable copies,
-    and the Optimizer updates only these copies. The original **2026 Sales
-    Plan** series from **From Sheets** and the **2025 COGS** semantic
-    model measure stay unchanged. You hide the originals now to keep the
-    grid clean. After the Optimizer runs, you show them again to compare
-    the results.
+1. On the **Planning** tab, select **Number** \> **Copy from another series** \> **2025 COGS**.
 
-10. On the **Planning** ribbon, select **Show Columns**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image129.png)
+
+1. In the **Data Input** pane, in the **Title** field, enter the following value:
+
+    `COGS`
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image130.png)
+
+1. Verify that the **Data Input** pane shows the following settings:
+
+    - Insert as - **Visual Measure**
+    - Input type - `Number`
+    - Column aggregation type - `Sum`
+    - Row aggregation type - `Sum`
+    - Distribute parent value to children - **Selected**
+
+
+1. Select **Create**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image131.png)
+
+    The **COGS** column is added to the table. It shows the same values as **2025 COGS**, for example **7,543.23** for **All**.
+
+    >[!Note] The **Sales Plan** and **COGS** columns are editable copies, and the Optimizer updates only these copies. The original **2026 Sales Plan** series from **From Sheets** and the **2025 COGS** semantic model measure stay unchanged. You hide the originals now to keep the grid clean. After the Optimizer runs, you show them again to compare the results.
+
+1. On the **Planning** ribbon, select **Show Columns**.
 
     The **Show Columns** pane opens.
 
-11. In the **Show Columns** pane, clear the **2025 COGS** and **2026
-    Sales Plan** check boxes.
+1. In the **Show Columns** pane, clear the **2025 COGS** and **2026 Sales Plan** check boxes.
 
-    ![Screenshot](media/image132.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image132.png)
 
     The grid shows only the **Sales Plan** and **COGS** columns.
 
-## Task 3: Calculate gross profit
 
-In this task, you add a formula column that calculates gross profit from
-the editable **Sales Plan** and **COGS** columns. The Optimizer uses
-this gross profit value to check progress toward the \$12.5B goal.
+### Task 3: Calculate gross profit
 
-1.  On the **Planning** ribbon, in the **Rows & Columns** group, select
-    **Formula**.
+In this task, you add a formula column that calculates gross profit from the editable **Sales Plan** and **COGS** columns. The Optimizer uses this gross profit value to check progress toward the \$12.5B goal.
 
-    ![Screenshot](media/image133.png)
+1. On the **Planning** ribbon, in the **Rows & Columns** group, select **Formula**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image133.png)
 
     The **Formula Measure** pane opens.
 
-2.  In the **Formula Measure** pane, enter the following details:
+1. In the **Formula Measure** pane, enter the following details:
 
-    - Title - +++Gross Profit+++
-
+    - Title - `Gross Profit`
     - Insert as - **Visual Measure**
+    - Data type - `Number`
+    - Formula - `[Sales Plan]-[COGS]`
+    - Column aggregation type - `Formula`
+    - Row aggregation type - `Formula`
 
-    - Data type - **Number**
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image134.png)
 
-    - Formula - +++\[Sales Plan\]-\[COGS\]+++
+    >[!Note] Make sure the formula references the editable **Sales Plan** and **COGS** input columns that you created in the previous task. Don't select the original **2026 Sales Plan** or **2025 COGS** columns.
 
-    - Column aggregation type - **Formula**
 
-    - Row aggregation type - **Formula**
+1. Select **Create**.
 
-    ![Screenshot](media/image134.png)
+    The **Gross Profit** column is added to the grid. It's calculated from the **Sales Plan** and **COGS** columns. For example, the **All** row shows **10,819.56**. When you select a **Gross Profit** cell, the formula bar shows **= \[Sales Plan\]-\[COGS\]**.
 
-    **Note:** Make sure the formula references the editable **Sales Plan**
-    and **COGS** input columns that you created in the previous task.
-    Don't select the original **2026 Sales Plan** or **2025 COGS**
-    columns.
+1. Review the grid. Each region, brand, and category row shows the **Sales Plan**, **COGS**, and **Gross Profit** columns, and the **All** row shows **18,362.79**, **7,543.23**, and **10,819.56**.
 
-3.  Select **Create**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image135.png)
 
-    The **Gross Profit** column is added to the grid. It's calculated from
-    the **Sales Plan** and **COGS** columns. For example, the **All** row
-    shows **10,819.56**. When you select a **Gross Profit** cell, the
-    formula bar shows **= \[Sales Plan\]-\[COGS\]**.
 
-4.  Review the grid. Each region, brand, and category row shows the
-    **Sales Plan**, **COGS**, and **Gross Profit** columns, and the
-    **All** row shows **18,362.79**, **7,543.23**, and **10,819.56**.
+### Task 4: Run the Optimizer
 
-    ![Screenshot](media/image135.png)
+In this task, you start the Optimizer and set the CFO's \$12.5B gross profit goal as the target. The Optimizer adjusts the **Sales Plan** and **COGS** columns to find a combination that reaches this goal.
 
-## Task 4: Run the Optimizer
-
-In this task, you start the Optimizer and set the CFO's \$12.5B gross
-profit goal as the target. The Optimizer adjusts the **Sales Plan** and
-**COGS** columns to find a combination that reaches this goal.
-
-1.  In the **Gross Profit** column, select the grand total cell in the
-    **All** row.
+1. In the **Gross Profit** column, select the grand total cell in the **All** row.
 
     The **Optimize** option on the **Planning** ribbon becomes active.
 
-2.  On the **Planning** ribbon, in the **Tools** group, select
-    **Optimize**.
+1. On the **Planning** ribbon, in the **Tools** group, select **Optimize**.
 
-    ![Screenshot](media/image136.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image136.png)
 
-    The **Objective & Variables** dialog opens. It shows **GrandTotal**
-    and **2025 \> Gross Profit** as the cell to optimize.
+    The **Objective & Variables** dialog opens. It shows **GrandTotal** and **2025 \> Gross Profit** as the cell to optimize.
 
-3.  In the **Objective & Variables** dialog, enter the following
-    details:
+1. In the **Objective & Variables** dialog, enter the following details:
 
     - Objective - **Target**
-
-    - Target Value - +++12.5b+++
-
+    - Target Value - `12.5b`
     - Variables to Update - **Sales Plan**, **COGS**
 
-    ![Screenshot](media/image137.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image137.png)
 
-4.  Select **Next**.
+
+1. Select **Next**.
 
     The **Add Constraints** page opens and shows **No Constraints Added**.
 
-5.  On the **Add Constraints** page, select **Run**.
+1. On the **Add Constraints** page, select **Run**.
 
-    ![Screenshot](media/image138.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image138.png)
 
     The Optimizer runs without constraints, and the **Output** page opens.
 
-6.  Under **Results**, confirm that **Target Value** shows **12.50b**
-    and **Achieved** shows **12.50b** with a green check mark.
+1. Under **Results**, confirm that **Target Value** shows **12.50b** and **Achieved** shows **12.50b** with a green check mark.
 
-7.  Under **Variables**, review the Optimizer's solution for **Sales
-    Plan** and **COGS**.
+1. Under **Variables**, review the Optimizer's solution for **Sales Plan** and **COGS**.
 
-    For example, **Sales Plan** shows **19.20b** and **COGS** shows
-    **6.70b**. (The screenshot is from a different run and shows
-    **19.87b** and **7,371.50m**.)
+    For example, **Sales Plan** shows **19.20b** and **COGS** shows **6.70b**. (The screenshot is from a different run and shows **19.87b** and **7,371.50m**.)
 
-    **Note:** The Optimizer can return different **Sales Plan** and
-    **COGS** values on each run. Your values can differ from the examples
-    in this lab. **Achieved** must still match the **Target Value** of
-    **12.50b**.
+    >[!Note] The Optimizer can return different **Sales Plan** and **COGS** values on each run. Your values can differ from the examples in this lab. **Achieved** must still match the **Target Value** of **12.50b**.
 
-8.  Select **Apply**.
+1. Select **Apply**.
 
-    ![Screenshot](media/image139.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image139.png)
 
-    The Optimizer writes the optimized **Sales Plan** and **COGS** values
-    to the sheet. The **Gross Profit** grand total in the **All** row
-    shows **12,500.00**.
+    The Optimizer writes the optimized **Sales Plan** and **COGS** values to the sheet. The **Gross Profit** grand total in the **All** row shows **12,500.00**.
 
-9.  In the grid, select the expand icon (**⊞**) next to **APAC**.
+1. In the grid, select the expand icon (**⊞**) next to **APAC**.
 
-    ![Screenshot](media/image140.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image140.png)
 
-    Each brand and category shows updated **Sales Plan**, **COGS**, and
-    **Gross Profit** values. For example, **Hard Seltzer** \>
-    **AquaSplash** shows **35.97**, **11.64**, and **24.34**.
+    Each brand and category shows updated **Sales Plan**, **COGS**, and **Gross Profit** values. For example, **Hard Seltzer** \> **AquaSplash** shows **35.97**, **11.64**, and **24.34**.
 
-10. On the **Planning** ribbon, select **Show Columns**.
+1. On the **Planning** ribbon, select **Show Columns**.
 
     The **Show Columns** pane opens and lists the fields in the sheet.
 
-11. In the **Show Columns** pane, select the **2025 COGS** and **2026
-    Sales Plan** check boxes.
+1. In the **Show Columns** pane, select the **2025 COGS** and **2026 Sales Plan** check boxes.
 
-    ![Screenshot](media/image141.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image141.png)
 
-    The **2025 COGS** and **2026 Sales Plan** columns appear next to the
-    optimized **Sales Plan** and **COGS** columns.
+    The **2025 COGS** and **2026 Sales Plan** columns appear next to the optimized **Sales Plan** and **COGS** columns.
 
-12. In the **All** row, compare the **Sales Plan** value with the
-    original **2026 Sales Plan** value.
+1. In the **All** row, compare the **Sales Plan** value with the original **2026 Sales Plan** value.
 
-    For example, **Sales Plan** shows **19,203.01** and **2026 Sales
-    Plan** shows **18,362.79**. This is an increase of about 840 million.
+    For example, **Sales Plan** shows **19,203.01** and **2026 Sales Plan** shows **18,362.79**. This is an increase of about 840 million.
 
-13. In the **All** row, compare the **COGS** value with the original
-    **2025 COGS** value.
+1. In the **All** row, compare the **COGS** value with the original **2025 COGS** value.
 
-    For example, **COGS** shows **6,703.01** and **2025 COGS** shows
-    **7,543.23**. This is a reduction of about 840 million.
+    For example, **COGS** shows **6,703.01** and **2025 COGS** shows **7,543.23**. This is a reduction of about 840 million.
 
-    The revenue increase and the cost reduction together deliver the
-    **Gross Profit** target of **12,500.00** million (\$12.5B).
+    The revenue increase and the cost reduction together deliver the **Gross Profit** target of **12,500.00** million (\$12.5B).
 
-# Exercise 5: Approval workflow
 
-In this exercise, you set up a two-level approval workflow (**Regional
-Manager** and **Finance Director**) on the **Plan Intro** sheet and
-verify it with a submitted change.
+## Exercise 5: Approval workflow
 
-**Note:** This exercise is optional. Approvers must be users in your
-organization. In a single-user lab, you can select your own account for
-both levels.
+In this exercise, you set up a two-level approval workflow (**Regional Manager** and **Finance Director**) on the **Plan Intro** sheet and verify it with a submitted change.
 
-## Task 1: Enable the approval workflow
+>[!Note] This exercise is optional. Approvers must be users in your organization. In a single-user lab, you can select your own account for both levels.
 
-In this task, you set up two approval levels so that plan changes go to
-the regional manager first and then to the finance director. This
-ensures that someone reviews every change to the 2026 plan before the
-plan is final.
+### Task 1: Enable the approval workflow
 
-1.  In the **Explorer** pane, select the **Plan Intro** sheet.
+In this task, you set up two approval levels so that plan changes go to the regional manager first and then to the finance director. This ensures that someone reviews every change to the 2026 plan before the plan is final.
 
-2.  On the ribbon, select the **Model** tab.
+1. In the **Explorer** pane, select the **Plan Intro** sheet.
 
-3.  On the **Model** tab, in the **Workflows** group, select
-    **Approval**.
+1. On the ribbon, select the **Model** tab.
 
-    ![Screenshot](media/image142.png)
+1. On the **Model** tab, in the **Workflows** group, select **Approval**.
 
-    The **Approval Workflow** pane opens on the **Who needs to approve
-    your data?** page. It shows two level cards named **Level** and
-    **Level (2)**.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image142.png)
 
-4.  In the first level card, select the edit (pencil) icon next to
-    **Level**.
+    The **Approval Workflow** pane opens on the **Who needs to approve your data?** page. It shows two level cards named `Level` and **Level (2)**.
 
-    ![Screenshot](media/image143.png)
+1. In the first level card, select the edit (pencil) icon next to **Level**.
 
-5.  In the level name field, enter the following name:
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image143.png)
 
-    +++Regional Manager+++
+1. In the level name field, enter the following name:
 
-6.  Under **Select Approvers By**, confirm that **Email Address** is
-    selected.
+    `Regional Manager`
 
-7.  Select the **Select users...** field.
+1. Under **Select Approvers By**, confirm that **Email Address** is selected.
 
-8.  Enter the name or email address of the user who acts as the regional
-    manager, for example the second lab user provided in your lab
-    environment.
+1. Select the **Select users...** field.
 
-9.  Select the regional manager's account from the list.
+1. Enter the name or email address of the user who acts as the regional manager, for example the second lab user provided in your lab environment.
 
-    The user appears in the **Select users...** field of the **Regional
-    Manager** level.
+1. Select the regional manager's account from the list.
 
-10. In the second level card, select the edit (pencil) icon next to
-    **Level (2)**.
+    The user appears in the **Select users...** field of the **Regional Manager** level.
 
-11. In the level name field, enter the following name:
+1. In the second level card, select the edit (pencil) icon next to **Level (2)**.
 
-    +++Finance Director+++
+1. In the level name field, enter the following name:
 
-12. Under **Select Approvers By**, confirm that **Email Address** is
-    selected.
+    `Finance Director`
 
-13. Select the **Select users...** field.
+1. Under **Select Approvers By**, confirm that **Email Address** is selected.
 
-14. Enter the name or email address of the user who acts as the finance
-    director, for example your own lab user account.
+1. Select the **Select users...** field.
 
-15. Select the finance director's account from the list.
+1. Enter the name or email address of the user who acts as the finance director, for example your own lab user account.
 
-    The user appears in the **Select users...** field of the **Finance
-    Director** level.
+1. Select the finance director's account from the list.
 
-16. Confirm that the **Allow entry on Totals/Subtotals** check box is
-    selected for both levels.
+    The user appears in the **Select users...** field of the **Finance Director** level.
 
-17. Select **Next**.
+1. Confirm that the **Allow entry on Totals/Subtotals** check box is selected for both levels.
 
-    ![Screenshot](media/image144.png)
+1. Select **Next**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image144.png)
 
     The **How should the approval flow work?** page opens.
 
-18. Under **Reset on Rejection**, turn on the **Reset all previous
-    levels to In Progress** toggle.
+1. Under **Reset on Rejection**, turn on the **Reset all previous levels to In Progress** toggle.
 
-    When an approver rejects a change, all previous approval levels return
-    to **In Progress** for editing.
+    When an approver rejects a change, all previous approval levels return to **In Progress** for editing.
 
-19. Under **Teams Notifications**, confirm that the **When submitted For
-    review** and **When approved/rejected** toggles are turned on.
+1. Under **Teams Notifications**, confirm that the **When submitted For review** and **When approved/rejected** toggles are turned on.
 
-20. Select **Submit**.
+1. Select **Submit**.
 
-    ![Screenshot](media/image145.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image145.png)
 
-    The approval workflow for the **Plan Intro** sheet starts saving with
-    the **Regional Manager** and **Finance Director** levels.
+    The approval workflow for the **Plan Intro** sheet starts saving with the **Regional Manager** and **Finance Director** levels.
 
-21. Wait for the approval workflow to finish saving.
+1. Wait for the approval workflow to finish saving.
 
-    ![Screenshot](media/image146.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image146.png)
 
-    The **How should the approval flow work?** page closes, and the **Plan
-    Intro** sheet opens again.
+    The **How should the approval flow work?** page closes, and the **Plan Intro** sheet opens again.
 
-22. In the sheet, scroll right to the **Status** column at the end of
-    the columns.
+1. In the sheet, scroll right to the **Status** column at the end of the columns.
 
-    ![Screenshot](media/image147.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image147.png)
 
-    The **Status** column shows **In Progress** for the **NA** row. The
-    **Regional Manager** and **Finance Director** approval columns appear
-    next to the **Status** column.
+    The **Status** column shows **In Progress** for the **NA** row. The **Regional Manager** and **Finance Director** approval columns appear next to the **Status** column.
 
-## Task 2: Verify the approval workflow
 
-In this task, you change a value in the 2026 Sales Plan and submit the
-change for approval. This confirms that plan changes go through the
-approval workflow before the plan is finalized.
+### Task 2: Verify the approval workflow
 
-1.  In the sheet, under **Region Name**, select the expand icon (**⊞**)
-    next to **APAC**.
+In this task, you change a value in the 2026 Sales Plan and submit the change for approval. This confirms that plan changes go through the approval workflow before the plan is finalized.
 
-    The **APAC** row expands and shows its product categories, including
-    **Beer**, **Hard Seltzer**, and **Non-Alcoholic**.
+1. In the sheet, under **Region Name**, select the expand icon (**⊞**) next to **APAC**.
 
-2.  In the **APAC** \> **Beer** row, double-click the cell under **Grand
-    Total** \> **2026 Sales Plan**.
+    The **APAC** row expands and shows its product categories, including **Beer**, **Hard Seltzer**, and **Non-Alcoholic**.
 
-    The formula bar opens and shows the current value of the cell,
-    **1894286222.9**.
+1. In the **APAC** \> **Beer** row, double-click the cell under **Grand Total** \> **2026 Sales Plan**.
 
-3.  In the formula bar, place the cursor after the existing value.
+    The formula bar opens and shows the current value of the cell, **1894286222.9**.
 
-4.  Type **+10%** (a plus sign followed by 10%) to increase the plan by
-    10 percent.
+1. In the formula bar, place the cursor after the existing value.
 
-    ![Screenshot](media/image148.png)
+1. Type **+10%** (a plus sign followed by 10%) to increase the plan by 10 percent.
 
-    A preview of the new value, **2,083,714,845.19**, appears below the
-    formula bar.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image148.png)
 
-5.  Press **Enter**.
+    A preview of the new value, **2,083,714,845.19**, appears below the formula bar.
 
-    ![Screenshot](media/image149.png)
+1. Press **Enter**.
 
-    The **Beer** value in the **2026 Sales Plan** column changes to
-    **2,083.71**. The **APAC** total changes to **2,341.46**. The
-    quarterly **2026 Sales Plan** values for **APAC** and **Beer** also
-    update.
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image149.png)
 
-6.  In the sheet, under **Regional Manager**, select the cell in the
-    **APAC** \> **Beer** row.
+    The **Beer** value in the **2026 Sales Plan** column changes to **2,083.71**. The **APAC** total changes to **2,341.46**. The quarterly **2026 Sales Plan** values for **APAC** and **Beer** also update.
 
-    A list opens. It shows the **Search for an option** box and the **In
-    Progress**, **Submitted**, and **Reopened** options.
+1. In the sheet, under **Regional Manager**, select the cell in the **APAC** \> **Beer** row.
 
-7.  In the list, select **Submitted**.
+    A list opens. It shows the **Search for an option** box and the **In Progress**, **Submitted**, and **Reopened** options.
 
-    ![Screenshot](media/image150.png)
+1. In the list, select **Submitted**.
+
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image150.png)
 
     The **Regional Manager** cell in the **Beer** row shows **Submitted**.
 
-8.  Verify that the **Finance Director** cell in the **Beer** row shows
-    **Pending**.
+1. Verify that the **Finance Director** cell in the **Beer** row shows **Pending**.
 
-    ![Screenshot](media/image151.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image151.png)
 
-    The **Pending** status confirms that the submission is routed to the
-    finance director for approval.
+    The **Pending** status confirms that the submission is routed to the finance director for approval.
 
-    **Note:** When the regional manager submits the change, Microsoft
-    Teams sends a notification to the finance director. The finance
-    director can then approve or reject the change.
+    >[!Note] When the regional manager submits the change, Microsoft Teams sends a notification to the finance director. The finance director can then approve or reject the change.
 
-9.  In the sheet, under **Finance Director**, select the **Pending**
-    cell in the **APAC** \> **Beer** row.
+1. In the sheet, under **Finance Director**, select the **Pending** cell in the **APAC** \> **Beer** row.
 
-    ![Screenshot](media/image152.png)
+    ![Screenshot](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2001/media/image152.png)
 
-    A list opens. It shows **Pending** as the current value, the **Search
-    for an option** box, and the **Approved** and **Rejected** options.
-    The finance director selects one of these options to approve or reject
-    the change.
+    A list opens. It shows **Pending** as the current value, the **Search for an option** box, and the **Approved** and **Rejected** options. The finance director selects one of these options to approve or reject the change.
 
-10. Press **Esc** to close the list without changing the status.
+1. Press **Esc** to close the list without changing the status.
 
-    The list closes, and the **Finance Director** cell in the **Beer** row
-    still shows **Pending**.
+    The list closes, and the **Finance Director** cell in the **Beer** row still shows **Pending**.
 
-**Outcomes**
 
-This section recaps what you accomplished in this lab. Use it to confirm
-that you completed each exercise before you read the summary.
+### Outcomes
 
-- You set up the training environment. You imported the semantic model,
-  created the SQL database, built the Plan app, and configured both
-  connections.
+This section recaps what you accomplished in this lab. Use it to confirm that you completed each exercise before you read the summary.
 
-- You created the **Plan Intro** sheet. The sheet has **Region Name** \>
-  **Category** \> **Brand** rows, date hierarchy columns, and **2025
-  Gross Revenue** values.
+    - You set up the training environment. You imported the semantic model,
+  created the SQL database, built the Plan app, and configured both connections.
 
-- You set the **2026 Target** at \$18.75B. You distributed the target by
+    - You created the **Plan Intro** sheet. The sheet has **Region Name** \>
+  **Category** \> **Brand** rows, date hierarchy columns, and **2025 Gross Revenue** values.
+
+    - You set the **2026 Target** at \$18.75B. You distributed the target by
   prior-year weights and applied an H2 skew across **Q3** and **Q4**.
 
-- You created the **2026 Sales Plan**:
-
-  - You adjusted Summit Lager NA by +8% with a 4% quarterly growth
+    - You created the **2026 Sales Plan**:
+    - You adjusted Summit Lager NA by +8% with a 4% quarterly growth
     trend.
 
-  - You used **Bulk Edit** to apply a +8% Q3 uplift to Beer and Hard
+    - You used **Bulk Edit** to apply a +8% Q3 uplift to Beer and Hard
     Seltzer in EU and LA.
 
-- You added an inline comment to Summit Lager NA. You also enabled the
+    - You added an inline comment to Summit Lager NA. You also enabled the
   **Comments** column and tagged another user in a row-level comment.
 
-- You built the **Gross Profit** sheet. The sheet uses editable **Sales
-  Plan** and **COGS** copies of **2026 Sales Plan** and **2025 COGS**,
-  with **Gross Profit** as a formula measure.
+    - You built the **Gross Profit** sheet. The sheet uses editable **Sales
+  Plan** and **COGS** copies of **2026 Sales Plan** and **2025 COGS**, with **Gross Profit** as a formula measure.
 
-- You ran the Optimizer with a \$12.5B gross profit target:
+    - You ran the Optimizer with a \$12.5B gross profit target:
+    - The Sales Plan increased from \$18,363M to about \$19,203M.
+    - COGS decreased from \$7,543M to about \$6,703M.
+    - You compared the original and optimized values side by side.
+    - (Optional) You configured a two-level approval workflow. You added the
+  **Regional Manager** and **Finance Director** levels. You then routed the APAC Beer submission to the finance director for approval.
 
-  - The Sales Plan increased from \$18,363M to about \$19,203M.
 
-  - COGS decreased from \$7,543M to about \$6,703M.
+## Summary
 
-- You compared the original and optimized values side by side.
-
-- (Optional) You configured a two-level approval workflow. You added the
-  **Regional Manager** and **Finance Director** levels. You then routed
-  the APAC Beer submission to the finance director for approval.
-
-**Summary**
-
-In this lab, you imported the Acme Beverages semantic model and created
-a SQL database in Microsoft Fabric. You then built a Plan app and
-configured the semantic model and SQL connections. You created the Plan
-Intro sheet with Region Name, Category, and Brand rows, date hierarchy
-columns, and 2025 Gross Revenue values. You then explored the Plan
-interface. You set a top-down 2026 Target of \$18.75B and distributed it
-by 2025 revenue weights. You then locked Q1 and Q2 to apply an H2 skew
-to Q3 and Q4. You built a bottom-up 2026 Sales Plan with an 8% Summit
-Lager uplift in North America and a 4% quarterly growth trend. You then
-used Bulk Edit to add an 8% Q3 uplift for Beer and Hard Seltzer in the
-EU and Latin America. You added inline comments, a Comments column with
-an @mention, and a Status column to support collaboration. Finally, you
-built a Gross Profit sheet and ran the Optimizer to reach a \$12.5B
-gross profit target. The Optimizer increased the Sales Plan from
-\$18,363M to about \$19,203M and reduced COGS from \$7,543M to about
-\$6,703M. Optionally, you configured a two-level approval workflow.
+In this lab, you imported the Acme Beverages semantic model and created a SQL database in Microsoft Fabric. You then built a Plan app and configured the semantic model and SQL connections. You created the Plan Intro sheet with Region Name, Category, and Brand rows, date hierarchy columns, and 2025 Gross Revenue values. You then explored the Plan interface. You set a top-down 2026 Target of \$18.75B and distributed it by 2025 revenue weights. You then locked Q1 and Q2 to apply an H2 skew to Q3 and Q4. You built a bottom-up 2026 Sales Plan with an 8% Summit Lager uplift in North America and a 4% quarterly growth trend. You then used Bulk Edit to add an 8% Q3 uplift for Beer and Hard Seltzer in the EU and Latin America. You added inline comments, a Comments column with an @mention, and a Status column to support collaboration. Finally, you built a Gross Profit sheet and ran the Optimizer to reach a \$12.5B gross profit target. The Optimizer increased the Sales Plan from \$18,363M to about \$19,203M and reduced COGS from \$7,543M to about \$6,703M. Optionally, you configured a two-level approval workflow.
