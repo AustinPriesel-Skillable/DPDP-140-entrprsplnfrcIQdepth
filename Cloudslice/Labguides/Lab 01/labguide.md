@@ -108,7 +108,7 @@ notifications.
 In this exercise, you build the Acme Beverages planning environment with
 a workspace, semantic model, SQL database, Plan app, and connections.
 
-**Note:** When you name the Fabric SQL database, add your name as a
+>[!Note] When you name the Fabric SQL database, add your name as a
 suffix, for example Acme_Beverages_JohnS or Acme_Beverages_JS. Fabric
 adds a unique identifier to connection names automatically. The suffix
 keeps your items separate in shared workspaces, prevents naming
@@ -149,7 +149,7 @@ database, and Plan app that you use in the rest of the lab.
 
     The message **This name is available** appears under the field.
 
-    **Note:** The screenshots show the workspace name
+    >[!Note] The screenshots show the workspace name
     **Fabricplan-Day176895**. Your workspace name ends with your own lab
     instance ID.
 
