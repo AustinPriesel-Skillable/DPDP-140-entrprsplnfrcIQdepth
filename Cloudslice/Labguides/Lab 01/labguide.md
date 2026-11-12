@@ -425,7 +425,7 @@ In this task, you add the region and product dimensions to the rows of the Plann
 
 1. On the **Data** pane, expand **Dim skus**.
 
-    The **Brand**, **Category**, **Multipack**, **Pack Format**, and **SKU Code** fields appear under **Dim skus**.
+    The **Brand**, **Category**, and **SKU Code** fields appear under **Dim skus**.
 
 1. Drag **Category** into the **Rows** well, below **Region Name**.
 
