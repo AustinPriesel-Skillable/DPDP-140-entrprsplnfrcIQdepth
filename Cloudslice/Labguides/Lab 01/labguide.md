@@ -73,6 +73,11 @@ You import the Acme Beverages .pbix file, which creates a Power BI semantic mode
 In this exercise, you build the Acme Beverages planning environment with a workspace, semantic model, SQL database, Plan app, and connections.
 
 >[!Note] When you name the Fabric SQL database, add your name as a suffix, for example Acme_Beverages_JohnS or Acme_Beverages_JS. Fabric adds a unique identifier to connection names automatically. The suffix keeps your items separate in shared workspaces, prevents naming conflicts, and makes your items easier to find and troubleshoot.
+>[!Note] When you name the Fabric SQL database, add your name as a
+suffix, for example Acme_Beverages_JohnS or Acme_Beverages_JS. Fabric
+adds a unique identifier to connection names automatically. The suffix
+keeps your items separate in shared workspaces, prevents naming
+conflicts, and makes your items easier to find and troubleshoot.
 
 ### Task 1: Create your training workspace
 
@@ -103,6 +108,9 @@ In this task, you sign in to Microsoft Fabric and create a workspace on a Fabric
     The message **This name is available** appears under the field.
 
     >[!Note] The screenshots show the workspace name `Fabricplan-Day176895`. Your workspace name ends with your own lab instance ID.
+    >[!Note] The screenshots show the workspace name
+    **Fabricplan-Day176895**. Your workspace name ends with your own lab
+    instance ID.
 
 1. Select **Advanced** to expand the advanced settings.
 
