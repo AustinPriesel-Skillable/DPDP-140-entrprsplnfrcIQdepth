@@ -106,8 +106,6 @@ In this task, you create a SQL database named `fabric_plan_training` in the trai
 
 1. On the toolbar, select **New item**.
 
-    ![Screenshot 5](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2006/media/image5.png)
-
     The **New item** pane opens.
 
 1. In the **New item** pane, select **All items**.
@@ -117,6 +115,7 @@ In this task, you create a SQL database named `fabric_plan_training` in the trai
 1. Select **SQL database**.
 
     The **New SQL database** dialog box opens.
+       ![Screenshot 5](https://raw.githubusercontent.com/technofocus-pte/entrprsplnfrcIQdepth/refs/heads/main/Cloudslice/Labguides/Lab%2006/media/image5.png)
 
 1. In the **New SQL database** dialog box, enter the following details:
 
