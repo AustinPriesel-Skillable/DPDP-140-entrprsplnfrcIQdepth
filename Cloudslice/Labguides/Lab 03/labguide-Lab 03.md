@@ -117,7 +117,7 @@ In this task, you import the **MeasureModel** semantic model and create a new pl
 
     **Region Name** appears under **Rows** on the **Fields** pane \> **Assign Data** tab.
 
-1. In the **Data** pane, under **Semantic Model**, select the **Country Name** check box.
+1. In the **Data** pane, under **Semantic Model**, select the **Dim Countries** > **Country Name** check box.
 
     **Country Name** appears under **Rows**, below **Region Name**.
 
